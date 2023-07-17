@@ -1,9 +1,12 @@
 from aiogram import types
-from aiogram.dispatcher.filters import CommandStart
 from aiogram.dispatcher import FSMContext
+from aiogram.dispatcher.filters.state import StatesGroup, State
+from app.loader import dp
 
 
-from app.loader import dp, UserState
+class UserState(StatesGroup):
+    name = State()
+    address = State()
 
 
 @dp.message_handler(commands="reg")

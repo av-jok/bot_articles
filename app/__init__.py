@@ -1,5 +1,3 @@
-from loader import *
-
 __author__ = """
     Forzend Mainer
     https://github.com/0Kit/

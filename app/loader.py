@@ -1,6 +1,6 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
 from app import config
 
@@ -10,6 +10,8 @@ bot = Bot(
 )
 
 storage = MemoryStorage()
+storage = RedisStorage2(password=config.redis.password,
+                        host=config.redis.host) if config.tg_bot.use_redis else MemoryStorage()
 
 dp = Dispatcher(
     bot=bot,
@@ -21,8 +23,3 @@ __all__ = (
     "storage",
     "dp",
 )
-
-
-class UserState(StatesGroup):
-    name = State()
-    address = State()
