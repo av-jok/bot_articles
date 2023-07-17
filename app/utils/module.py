@@ -34,16 +34,15 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos):
     media = types.MediaGroup()
 
     for iterator in photos:
-        pprint(iterator['image'])
-        # media.attach_photo(iterator['image'])
-        # img_data = requests.get(iterator['image']).content
-        # filename = "data/" + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
-        # with open(filename, 'wb') as photo:
-        #     photo.write(img_data)
-        # media.attach_photo(types.InputFile(filename, iterator['name']))
+        # pprint(iterator['image'])
+        img_data = requests.get(iterator['image']).content
+        filename = "data/" + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
+        with open(filename, 'wb') as photo:
+            photo.write(img_data)
+        media.attach_photo(types.InputFile(filename, iterator['name']))
 
-    # await types.ChatActions.upload_photo()
-    # await callback.message.reply_media_group(media=media)
+    await types.ChatActions.upload_photo()
+    await callback.message.reply_media_group(media=media)
     # await message.reply_media_group()  # Отправка фото)
 
     return True

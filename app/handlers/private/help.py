@@ -60,7 +60,7 @@ async def callbacks(callback: types.CallbackQuery):
 
     if post['action'] == 'photo':
         photos = module.get_photo_by_id(post['id'])
-        pprint(photos)
+        # pprint(photos)
         if photos:
             await module.send_photo_by_id(callback, photos)
         else:
