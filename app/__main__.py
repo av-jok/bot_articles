@@ -14,7 +14,7 @@ async def on_startup(dispatcher: Dispatcher):
 
 
 if __name__ == '__main__':
-    utils.setup_logger("INFO", ["sqlalchemy.engine", "aiogram.bot.api"])
+    utils.setup_logger("DEBUG")
     executor.start_polling(
         dp, on_startup=on_startup, skip_updates=config.SKIP_UPDATES
     )
