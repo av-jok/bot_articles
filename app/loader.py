@@ -2,9 +2,8 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
 
-from app.config import load_config
+from config import conf
 
-conf = load_config("data/.env")
 
 bot = Bot(
     token=conf.tg_bot.token,

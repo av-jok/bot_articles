@@ -6,7 +6,7 @@ from environs import Env
 env = Env()
 env.read_env()
 
-BOT_TOKEN = env.str("BOT_TOKEN")
+
 SKIP_UPDATES = env.bool("SKIP_UPDATES", False)
 WORK_PATH: Path = Path(__file__).parent.parent
 
@@ -78,3 +78,6 @@ def load_config(path: str = None):
         ),
         misc=Miscellaneous()
     )
+
+
+conf = load_config("data/.env")

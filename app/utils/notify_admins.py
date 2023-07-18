@@ -7,10 +7,10 @@ from loguru import logger
 from app.loader import dp
 
 
-async def notify_admins(admins: Union[List[int], List[str], int, str]):
+async def notify_admins(text: str, admins: Union[List[int], List[str], int, str]):
     count = 0
     for admin in admins:
         with suppress(ChatNotFound):
-            await dp.bot.send_message(admin, "Bot started")
+            await dp.bot.send_message(admin, text)
             count += 1
     logger.info(f"{count} admins received messages")

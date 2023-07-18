@@ -23,14 +23,6 @@ async def command_help_handler(message: types.Message):
 
 def get_keyboard_fab(ids):
 
-    # buttons = [
-    #     InlineKeyboardButton(text="Device", url=iterator['url'].replace('/api/', '/')),
-    #     # InlineKeyboardButton(text="Ping", callback_data=cb.new(post2="ip", action="ping", id=ip)),
-    #     InlineKeyboardButton(text="Фото", callback_data=cb.new(post2="device", action="photo", id=did))
-    # ]
-    # keyboard = InlineKeyboardMarkup(row_width=3)
-    # keyboard.add(*buttons)
-
     buttons = [
         types.InlineKeyboardButton(text="NetBox", callback_data=cb.new(action="open", id=str(ids))),
         types.InlineKeyboardButton(text="Ping", callback_data=cb.new(action="ping", id=str(ids))),
