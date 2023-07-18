@@ -1,12 +1,7 @@
-# import logging
 import requests
 from pprint import pprint
 from aiogram import types
-# from aiogram.types import Message
-
 from app.config import USERS, HEADERS, PAYLOAD, conf
-
-# logging.basicConfig(level=logging.DEBUG)
 
 
 def get_photo_by_id(ids):
@@ -40,6 +35,5 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos):
 
     await types.ChatActions.upload_photo()
     await callback.message.reply_media_group(media=media)
-    # await message.reply_media_group()  # Отправка фото)
 
     return True
