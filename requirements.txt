@@ -3,3 +3,5 @@ environs==9.5.0
 loguru==0.7.0
 requests~=2.31.0
 redis==4.6.0
+SQLAlchemy~=2.0.19
+PyMySQL==1.1.0

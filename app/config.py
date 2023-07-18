@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from environs import Env
+from sqlalchemy import create_engine
 
 env = Env()
 env.read_env()
@@ -12,6 +13,11 @@ HEADERS = {
     'Content-Type': 'application/json',
     'Authorization': 'Token 7f50ada4a4a66d4b2385e4f8f59a069bc219089b'
 }
+
+engine = create_engine("mysql+pymysql://root:pass@localhost/mydb")
+# engine.connect()
+
+print(engine)
 
 
 @dataclass

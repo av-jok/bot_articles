@@ -33,7 +33,7 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos):
     for iterator in photos:
         # pprint(iterator['image'])
         img_data = requests.get(iterator['image']).content
-        filename = "data/" + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
+        filename = "../data/" + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
         with open(filename, 'wb') as photo:
             photo.write(img_data)
         media.attach_photo(types.InputFile(filename, iterator['name']))
