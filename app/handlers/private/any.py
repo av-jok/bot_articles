@@ -1,4 +1,5 @@
 import logging
+from loguru import logger
 import requests
 import re
 from aiogram.dispatcher import filters
@@ -41,6 +42,28 @@ async def callbacks(callback: types.CallbackQuery):
 
     await bot.send_message(callback.from_user.id, f"type: {post['type']}\nid: {post['id']}\naction: {post['action']}")
     await callback.answer()
+
+
+@dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
+async def scan_message(message: types.Message):
+    logger.debug("Downloading photo")
+    # file_info = await bot.get_file(message.photo[-1].file_id)
+    if message.reply_to_message:
+        if re.match('^\\d{5}$', message.reply_to_message.text):
+            text = re.search('^\\d{5}$', message.reply_to_message.text)
+            text = str(text[0])
+
+            filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
+            await message.photo[-1].download(destination_file='../photos/' + filename)
+
+            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
+            await message.answer("Принято")
+            logger.debug("Downloading photo")
+
+        else:
+            await message.answer("Фотография должна быть ответом на Инв свича")
+    else:
+        await message.answer("Фотография должна быть ответом на Инв свича")
 
 
 @dp.message_handler(filters.IDFilter(user_id=USERS))
