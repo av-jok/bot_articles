@@ -1,16 +1,8 @@
-from pathlib import Path
 from dataclasses import dataclass
 
 from environs import Env
-
 env = Env()
 env.read_env()
-
-
-SKIP_UPDATES = env.bool("SKIP_UPDATES", False)
-WORK_PATH: Path = Path(__file__).parent.parent
-
-SUPERUSER_IDS = env.list("SUPERUSER_IDS")
 
 USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 1016868504, 361955359, 1292364914, 449155597,
          233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322}
@@ -42,6 +34,7 @@ class TgBot:
     token: str
     admin_ids: list[int]
     use_redis: bool
+    skip_updates: bool
 
 
 @dataclass
@@ -64,6 +57,7 @@ def load_config(path: str = None):
             token=env.str("BOT_TOKEN"),
             admin_ids=list(map(int, env.list("SUPERUSER_IDS"))),
             use_redis=env.bool("USE_REDIS"),
+            skip_updates=env.bool("SKIP_UPDATES")
         ),
         db=DbConfig(
             host=env.str('DB_HOST'),
