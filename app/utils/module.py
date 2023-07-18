@@ -35,5 +35,6 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos):
 
     await types.ChatActions.upload_photo()
     await callback.message.reply_media_group(media=media)
+    await callback.answer()
 
     return True

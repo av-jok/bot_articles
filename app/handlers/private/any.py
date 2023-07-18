@@ -1,12 +1,12 @@
 import logging
 from loguru import logger
-import requests
 import re
+import requests
 from aiogram.dispatcher import filters
 from aiogram import types
 from aiogram.utils.callback_data import CallbackData
 from app.loader import dp, bot
-from app.config import USERS, HEADERS, PAYLOAD, conf
+from app.config import *
 from app.utils.module import *
 
 
@@ -23,7 +23,6 @@ async def callbacks(callback: types.CallbackQuery):
 
     if post['action'] == 'ping':
         pprint(post)
-        # response_list = ping(post['id'], count=1)
         return await callback.answer(
             # text=f'Код - {response_list}',
             # show_alert=True
@@ -71,9 +70,7 @@ async def echo(message: types.Message):
     if len(message.text) < 4:
         await message.answer("Запрос должен быть длиннее")
         return False
-
     url = conf.misc.netbox_url + "api/dcim/devices/?q=" + message.text
-
     response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD)
     json = response.json()
 
@@ -93,9 +90,11 @@ async def echo(message: types.Message):
             if iterator['status']['label'] == 'Active':
                 status = '🟢'
             elif iterator['status']['label'] == 'Offline':
-                status = '🪦'
+                status = '🔴'
             elif iterator['status']['label'] == 'Inventory':
                 status = '📦'
+            elif iterator['status']['label'] == 'Decommissioning':
+                status = '⚰️'
             else:
                 status = iterator['status']['label']
 
