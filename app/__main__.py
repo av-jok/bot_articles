@@ -3,7 +3,7 @@ from aiogram.utils import executor
 
 from app import utils, config
 from app.loader import dp
-from config import conf
+from app.config import conf
 # The configuration of the modules using import
 from app import middlewares, filters, handlers
 
