@@ -12,6 +12,8 @@ class UserState(StatesGroup):
 @dp.message_handler(commands="reg")
 async def command_reg_handler(message: types.Message):
     await message.answer(f'Привет, {message.from_user.full_name}!\n Пройди регистрацию /reg\n Если не знаешь для чего она - 🖕')
+    await message.answer(f"Ваш ID: {message.from_user.id} \n\n Вы знаете кому его отправить")
+
     await message.answer("Введите своё имя")
     await UserState.name.set()
 

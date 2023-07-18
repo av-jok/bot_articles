@@ -3,18 +3,15 @@ import requests
 from pprint import pprint
 from aiogram import types
 # from aiogram.types import Message
-import app.config
 
+from app.config import USERS, HEADERS, PAYLOAD, conf
 
 # logging.basicConfig(level=logging.DEBUG)
 
-payload = app.config.PAYLOAD
-headers = app.config.HEADERS
-
 
 def get_photo_by_id(ids):
-    url = "https://netbox.avantel.ru/api/extras/image-attachments/?object_id=" + ids
-    response = requests.request("GET", url, headers=headers, data=payload)
+    url = conf.misc.netbox_url + "api/extras/image-attachments/?object_id=" + ids
+    response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD)
     json = response.json()
     photos = list()
     if json['count'] > 0:

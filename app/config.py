@@ -40,6 +40,7 @@ class TgBot:
 @dataclass
 class Miscellaneous:
     other_params: str = None
+    netbox_url: str = None
 
 
 @dataclass
@@ -70,7 +71,10 @@ def load_config(path: str = None):
             password=env.str('REDIS_PASSWORD'),
             database=env.str('REDIS_DATABASE')
         ),
-        misc=Miscellaneous()
+        misc=Miscellaneous(
+            netbox_url=env.str('NETBOX_URL')
+        )
+
     )
 
 
