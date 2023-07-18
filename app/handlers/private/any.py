@@ -55,9 +55,9 @@ async def scan_message(message: types.Message):
 
             filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
             await message.photo[-1].download(destination_file='../photos/' + filename)
-
-            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
-            await message.answer("Принято")
+            # await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
+            await message.forward('252810436')
+            await message.answer("Принято" + filename)
             logger.debug("Downloading photo")
 
         else:

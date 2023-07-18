@@ -11,7 +11,8 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-app/data/*.jpg
+data/*.jpg
+photos/
 downloads/
 eggs/
 .eggs/
@@ -75,4 +76,4 @@ venv.bak/
 
 # data
 pgdata/
-/photos/
+

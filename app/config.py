@@ -78,4 +78,4 @@ def load_config(path: str = None):
     )
 
 
-conf = load_config("data/.env")
+conf = load_config("../data/.env")
