@@ -17,8 +17,8 @@ async def on_sthutdown(dispatcher: Dispatcher):
     await utils.notify_admins("Bot shutdown", conf.tg_bot.admin_ids)
 
 if __name__ == '__main__':
-    # utils.setup_logger("INFO", ["sqlalchemy.engine", "aiogram.bot.api"])
-    utils.setup_logger("DEBUG", ["sqlalchemy.engine", "aiogram.bot.api"])
+    utils.setup_logger("INFO", ["sqlalchemy.engine", "aiogram.bot.api"])
+    # utils.setup_logger("DEBUG", ["sqlalchemy.engine", "aiogram.bot.api"])
     executor.start_polling(
         dp, on_startup=on_startup, on_shutdown=on_sthutdown, skip_updates=conf.tg_bot.skip_updates
     )
