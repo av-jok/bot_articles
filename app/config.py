@@ -17,7 +17,7 @@ HEADERS = {
 engine = create_engine("mysql+pymysql://root:pass@localhost/mydb")
 # engine.connect()
 
-print(engine)
+# print(engine)
 
 
 @dataclass
