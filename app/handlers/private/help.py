@@ -5,10 +5,13 @@ from app.loader import dp
 from pprint import pprint
 from app.loader import bot
 import app.utils.module as module
+from app.middlewares import rate_limit
+
 
 cb = CallbackData("post", "id", "action")
 
 
+@rate_limit(5, "help")
 @dp.message_handler(commands="help")
 async def command_help_handler(message: types.Message):
     """Responds to /help with list of available commands, which're located in data/config.py"""

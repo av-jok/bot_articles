@@ -1,6 +1,7 @@
 from loguru import logger
 
 from .errors import retry_after
+from .errors import errors
 from .private import start
 from .private import help
 from .private import reg

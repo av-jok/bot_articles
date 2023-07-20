@@ -8,11 +8,13 @@ from aiogram.utils.callback_data import CallbackData
 from app.loader import dp, bot
 from app.config import *
 from app.utils.module import *
+from app.middlewares import rate_limit
 
 
 cb = CallbackData("post", "post2", "id", "action")
 
 
+@rate_limit(5)
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
 async def callbacks(callback: types.CallbackQuery):
     call = callback.data.split(':')
@@ -65,6 +67,7 @@ async def scan_message(message: types.Message):
         await message.answer("Фотография должна быть ответом на Инв свича")
 
 
+@rate_limit(5)
 @dp.message_handler(filters.IDFilter(user_id=USERS))
 async def echo(message: types.Message):
     if len(message.text) < 4:

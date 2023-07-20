@@ -2,6 +2,15 @@ from dataclasses import dataclass
 from environs import Env
 from sqlalchemy import create_engine
 
+
+# List of commands
+commands = (
+    ("start", "See if the ship is sailing"),
+    ("help", "Get the command list"),
+    ("reg", "Get the command list"),
+    ("id", "Get the command list"),
+)
+
 env = Env()
 env.read_env()
 
@@ -16,8 +25,6 @@ HEADERS = {
 
 engine = create_engine("mysql+pymysql://root:pass@localhost/mydb")
 # engine.connect()
-
-print(engine)
 
 
 @dataclass
