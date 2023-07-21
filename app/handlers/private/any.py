@@ -14,7 +14,7 @@ from app.middlewares import rate_limit
 cb = CallbackData("post", "post2", "id", "action")
 
 
-@rate_limit(5)
+@rate_limit(15)
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
 async def callbacks(callback: types.CallbackQuery):
     call = callback.data.split(':')
@@ -55,9 +55,15 @@ async def scan_message(message: types.Message):
             text = str(text[0])
 
             filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
+            text = (f"Инв № - {text}\n"
+                    f"Файл - {filename}\n"
+                    f"Отправил - {message.reply_to_message.from_user.first_name}"
+                    )
             await message.photo[-1].download(destination_file='../photos/' + filename)
-            # await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
-            await message.forward('252810436')
+            if message.reply_to_message.from_user.id != 252810436:
+                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
+                # await bot.send_message('252810436', caption=text)
+                # await message.forward('252810436')
             await message.answer("Принято " + filename)
             logger.debug("Downloading photo")
 
