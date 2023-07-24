@@ -59,14 +59,19 @@ async def scan_message(message: types.Message):
                     f"Файл - {filename}\n"
                     f"Отправил - {message.reply_to_message.from_user.first_name}"
                     )
-            await message.photo[-1].download(destination_file='../photos/' + filename)
-            if message.reply_to_message.from_user.id != 252810436:
-                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
-                # await bot.send_message('252810436', caption=text)
-                # await message.forward('252810436')
-            await message.answer("Принято " + filename)
-            logger.debug("Downloading photo")
+            logger.debug("Downloading photo start")
 
+            file_info = bot.get_file(message.photo[len(message.photo) - 1].file_id)
+            downloaded_file = bot.download_file(file_info.file_path)
+            src = '../photos/' + filename
+            with open(src, 'wb') as new_file:
+                new_file.write(downloaded_file)
+            # await message.photo[-1].download(destination_file='../photos/' + filename)
+            logger.debug("Downloading photo end")
+            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
+            # await bot.send_message('252810436', caption=text)
+            # await message.forward('252810436')
+            await message.answer("Принято " + filename)
         else:
             await message.answer("Фотография должна быть ответом на Инв свича")
     else:
