@@ -10,7 +10,6 @@ from app.config import *
 from app.utils.module import *
 from app.middlewares import rate_limit
 
-
 cb = CallbackData("post", "post2", "id", "action")
 
 
@@ -61,12 +60,11 @@ async def scan_message(message: types.Message):
                     )
             logger.debug("Downloading photo start")
 
-            file_info = bot.get_file(message.photo[len(message.photo) - 1].file_id)
-            downloaded_file = bot.download_file(file_info)
-            src = '../photos/' + filename
-            with open(src, 'wb') as new_file:
-                new_file.write(downloaded_file)
-            # await message.photo[-1].download(destination_file='../photos/' + filename)
+            # downloaded_file = bot.download_file(bot.get_file(message.photo[len(message.photo) - 1].file_id))
+            # src = '../photos/' + filename
+            # with open(src, 'wb') as new_file:
+            #     new_file.write(downloaded_file)
+            await message.photo[-1].download(destination_file='../photos/' + filename)
             logger.debug("Downloading photo end")
             await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
             # await bot.send_message('252810436', caption=text)
