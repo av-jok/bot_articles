@@ -12,7 +12,7 @@ build/
 develop-eggs/
 dist/
 data/*.jpg
-photos/
+photos/*.jpg
 downloads/
 eggs/
 .eggs/
