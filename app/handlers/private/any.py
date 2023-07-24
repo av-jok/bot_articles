@@ -60,11 +60,12 @@ async def scan_message(message: types.Message):
                     )
             logger.debug("Downloading photo start")
 
-            # downloaded_file = bot.download_file(bot.get_file(message.photo[len(message.photo) - 1].file_id))
+            downloaded_file = bot.download_file(bot.get_file(message.photo[len(message.photo) - 1].file_id))
             # src = '../photos/' + filename
             # with open(src, 'wb') as new_file:
             #     new_file.write(downloaded_file)
             await message.photo[-1].download(destination_file='../photos/' + filename)
+            download_file(downloaded_file, filename)
             logger.debug("Downloading photo end")
             await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
             # await bot.send_message('252810436', caption=text)
@@ -138,3 +139,9 @@ async def echo(message: types.Message):
             await message.answer(msg, reply_markup=keyboard)
     else:
         await message.answer("Ничего не найдено")
+
+
+def download_file(file: types.File, name: str):
+    file_path = file.file_path
+    destination = r"../photos/" + name
+    destination_file = await bot.download_file(file_path, destination)
