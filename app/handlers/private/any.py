@@ -141,7 +141,7 @@ async def echo(message: types.Message):
         await message.answer("Ничего не найдено")
 
 
-def download_file(file: types.File, name: str):
+async def download_file(file: types.File, name: str):
     file_path = file.file_path
     destination = r"../photos/" + name
     destination_file = await bot.download_file(file_path, destination)
