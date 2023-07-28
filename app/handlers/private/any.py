@@ -40,43 +40,33 @@ async def callbacks(callback: types.CallbackQuery):
         json = response.json()
         if json['rack'] is not None:
             # print(json['rack'])
-            url_front = conf.misc.netbox_url + "api/dcim/racks/" + str(json['rack']['id']) + "/elevation/?face=front&render=svg"
-            url_rear = conf.misc.netbox_url + "api/dcim/racks/" + str(json['rack']['id']) + "/elevation/?face=rear&render=svg"
-            response_front = requests.request("GET", url_front, headers=HEADERS, data=PAYLOAD).content
-            response_rear = requests.request("GET", url_rear, headers=HEADERS, data=PAYLOAD).content
+            list_type = ["front", "rear"]
+            for iterator in list_type:
+                rack = str(json['rack']['id'])
+                side = iterator
+                url = conf.misc.netbox_url + f"api/dcim/racks/{rack}/elevation/?face={side}&render=svg"
+                response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD).content
 
-            filename_front = f"{json['rack']['id']}_front.svg"
-            filename_rear = f"{json['rack']['id']}_rear.svg"
+                filename = f"{rack}_{side}.png"
 
-            doc = aw.Document()
-            builder = aw.DocumentBuilder(doc)
-            shape = builder.insert_image(response_front)
-            pagesetup = builder.page_setup
-            pagesetup.page_width = shape.width
-            pagesetup.page_height = shape.height
-            pagesetup.top_margin = 0
-            pagesetup.left_margin = 0
-            pagesetup.bottom_margin = 0
-            pagesetup.right_margin = 0
-            doc.save("../Rack/" + filename_front)
+                logger.debug("Start svg2png")
+                doc = aw.Document()
+                builder = aw.DocumentBuilder(doc)
+                shape = builder.insert_image(response)
+                pagesetup = builder.page_setup
+                pagesetup.page_width = shape.width
+                pagesetup.page_height = shape.height
+                pagesetup.top_margin = 0
+                pagesetup.left_margin = 0
+                pagesetup.bottom_margin = 0
+                pagesetup.right_margin = 0
+                doc.save("../Rack/" + filename)
+                logger.debug("End svg2png")
 
-            doc = aw.Document()
-            builder = aw.DocumentBuilder(doc)
-            shape = builder.insert_image(response_rear)
-            pagesetup = builder.page_setup
-            pagesetup.page_width = shape.width
-            pagesetup.page_height = shape.height
-            pagesetup.top_margin = 0
-            pagesetup.left_margin = 0
-            pagesetup.bottom_margin = 0
-            pagesetup.right_margin = 0
-            doc.save("../Rack/" + filename_rear)
+                media.attach_photo(types.InputFile("../Rack/" + filename, side))
 
-            # media.attach_photo(types.InputFile("../Rack/" + filename_front, "Front"))
-            # media.attach_photo(types.InputFile("../Rack/" + filename_rear, "Rear"))
-
-            # await types.ChatActions.upload_photo()
-            # await callback.message.reply_media_group(media=media)
+            await types.ChatActions.upload_photo()
+            await callback.message.reply_media_group(media=media)
             await callback.answer()
 
         else:
