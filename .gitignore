@@ -11,8 +11,10 @@ __pycache__/
 build/
 develop-eggs/
 dist/
-data/*.jpg
-photos/*.jpg
+Data/*.jpg
+Photos/*.jpg
+Rack/*.jpg
+
 downloads/
 eggs/
 .eggs/

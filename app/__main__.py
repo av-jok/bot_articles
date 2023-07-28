@@ -11,10 +11,12 @@ from app import middlewares, filters, handlers
 async def on_startup(dispatcher: Dispatcher):
     await utils.setup_default_commands(dispatcher)
     await utils.notify_admins("Bot started", conf.tg_bot.admin_ids)
+    return True
 
 
 async def on_sthutdown(dispatcher: Dispatcher):
-    await utils.notify_admins("Bot shutdown", conf.tg_bot.admin_ids)
+    # await utils.notify_admins("Bot shutdown", conf.tg_bot.admin_ids)
+    return True
 
 if __name__ == '__main__':
     utils.setup_logger("INFO", ["sqlalchemy.engine", "aiogram.bot.api"])

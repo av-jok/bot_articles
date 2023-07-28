@@ -28,10 +28,9 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos):
 
     for iterator in photos:
 
-        img_data = requests.get(iterator['image']).content
-        # logger.info("Handlers are successfully configured")
-        # pprint(iterator['image'])
-        filename = "data/" + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
+        # img_data = requests.get(iterator['image']).content
+        img_data = requests.request("GET", iterator['image'], headers=HEADERS, data=PAYLOAD).content
+        filename = "../Data/" + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
         with open(filename, 'wb') as photo:
             photo.write(img_data)
         media.attach_photo(types.InputFile(filename, iterator['name']))

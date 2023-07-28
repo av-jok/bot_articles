@@ -4,11 +4,15 @@ import re
 import requests
 from aiogram.dispatcher import filters
 from aiogram import types
+
+import aspose.words as aw
+
 from aiogram.utils.callback_data import CallbackData
 from app.loader import dp, bot
 from app.config import *
 from app.utils.module import *
 from app.middlewares import rate_limit
+
 
 cb = CallbackData("post", "post2", "id", "action")
 
@@ -16,6 +20,7 @@ cb = CallbackData("post", "post2", "id", "action")
 @rate_limit(15)
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
 async def callbacks(callback: types.CallbackQuery):
+    media = types.MediaGroup()
     call = callback.data.split(':')
     post = dict()
     post['type'] = str(call[1])
@@ -27,6 +32,66 @@ async def callbacks(callback: types.CallbackQuery):
         return await callback.answer(
             # text=f'Код - {response_list}',
             # show_alert=True
+        )
+
+    if post['action'] == 'svg':
+        url = conf.misc.netbox_url + "api/dcim/devices/" + post['id'] + "/"
+        response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD)
+        json = response.json()
+        if json['rack'] is not None:
+            # print(json['rack'])
+            url_front = conf.misc.netbox_url + "api/dcim/racks/" + str(json['rack']['id']) + "/elevation/?face=front&render=svg"
+            url_rear = conf.misc.netbox_url + "api/dcim/racks/" + str(json['rack']['id']) + "/elevation/?face=rear&render=svg"
+            response_front = requests.request("GET", url_front, headers=HEADERS, data=PAYLOAD).content
+            response_rear = requests.request("GET", url_rear, headers=HEADERS, data=PAYLOAD).content
+
+            filename_front = f"{json['rack']['id']}_front.svg"
+            filename_rear = f"{json['rack']['id']}_rear.svg"
+
+            doc = aw.Document()
+            builder = aw.DocumentBuilder(doc)
+            shape = builder.insert_image(response_front)
+            pagesetup = builder.page_setup
+            pagesetup.page_width = shape.width
+            pagesetup.page_height = shape.height
+            pagesetup.top_margin = 0
+            pagesetup.left_margin = 0
+            pagesetup.bottom_margin = 0
+            pagesetup.right_margin = 0
+            doc.save("../Rack/" + filename_front)
+
+            doc = aw.Document()
+            builder = aw.DocumentBuilder(doc)
+            shape = builder.insert_image(response_rear)
+            pagesetup = builder.page_setup
+            pagesetup.page_width = shape.width
+            pagesetup.page_height = shape.height
+            pagesetup.top_margin = 0
+            pagesetup.left_margin = 0
+            pagesetup.bottom_margin = 0
+            pagesetup.right_margin = 0
+            doc.save("../Rack/" + filename_rear)
+
+            # media.attach_photo(types.InputFile("../Rack/" + filename_front, "Front"))
+            # media.attach_photo(types.InputFile("../Rack/" + filename_rear, "Rear"))
+
+            # await types.ChatActions.upload_photo()
+            # await callback.message.reply_media_group(media=media)
+            await callback.answer()
+
+        else:
+            return await callback.answer(
+                text=f'Оборудование не привязано к стойке',
+                show_alert=True
+            )
+
+        #     for iterator in json['results']:
+        #         did = iterator['id']
+
+        return await callback.answer(
+            # text=f'Код - {response_list}',
+            # show_alert=True
+            # cairosvg.svg2pdf(url='image.svg', write_to='image.pdf')
         )
 
     if post['action'] == 'photo':
@@ -65,7 +130,7 @@ async def scan_message(message: types.Message):
             # with open(src, 'wb') as new_file:
             #     new_file.write(downloaded_file)
             await message.photo[-1].download(destination_file='../photos/' + filename)
-            download_file(downloaded_file, filename)
+            await download_file(downloaded_file, filename)
             logger.debug("Downloading photo end")
             await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
             # await bot.send_message('252810436', caption=text)
@@ -99,6 +164,8 @@ async def echo(message: types.Message):
                 asset_tag = int(asset_tag[0])
             else:
                 asset_tag = None
+            if iterator['rack'] is not None:
+                rack = False
 
             if iterator['status']['label'] == 'Active':
                 status = '🟢'
@@ -130,6 +197,7 @@ async def echo(message: types.Message):
             )
             buttons = [
                 types.InlineKeyboardButton(text="Device", url=iterator['url'].replace('/api/', '/')),
+                types.InlineKeyboardButton(text="Стойка", callback_data=cb.new(post2="photo", action="svg", id=did)),
                 # types.InlineKeyboardButton(text="Ping", callback_data=cb.new(post2="ip", action="ping", id=ip)),
                 types.InlineKeyboardButton(text="Фото", callback_data=cb.new(post2="device", action="photo", id=did))
             ]
@@ -144,4 +212,4 @@ async def echo(message: types.Message):
 async def download_file(file: types.File, name: str):
     file_path = file.file_path
     destination = r"../photos/" + name
-    destination_file = await bot.download_file(file_path, destination)
+    await bot.download_file(file_path, destination)
