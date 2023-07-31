@@ -9,7 +9,7 @@ class UserState(StatesGroup):
     address = State()
 
 
-@dp.message_handler(commands="file")
+@dp.message_handler(commands="files")
 async def command_reg_handler(message: types.Message):
     await message.answer("Введите своё имя")
     await UserState.name.set()

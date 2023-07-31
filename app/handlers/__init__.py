@@ -5,6 +5,8 @@ from .errors import errors
 from .private import start
 from .private import help
 from .private import reg
+from .private import state
+
 from .private import any
 
 logger.info("Handlers are successfully configured")
