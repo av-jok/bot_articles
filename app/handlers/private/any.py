@@ -132,7 +132,6 @@ async def scan_message(message: types.Message):
         await message.answer("Фотография должна быть ответом на Инв свича")
 
 
-@rate_limit(5)
 @dp.message_handler(filters.IDFilter(user_id=USERS))
 async def echo(message: types.Message):
     if len(message.text) < 4:
@@ -187,7 +186,7 @@ async def echo(message: types.Message):
             )
             buttons = [
                 types.InlineKeyboardButton(text="Device", url=iterator['url'].replace('/api/', '/')),
-                types.InlineKeyboardButton(text="Стойка", callback_data=cb.new(post2="photo", action="svg", id=did)),
+                # types.InlineKeyboardButton(text="Стойка", callback_data=cb.new(post2="photo", action="svg", id=did)),
                 # types.InlineKeyboardButton(text="Ping", callback_data=cb.new(post2="ip", action="ping", id=ip)),
                 types.InlineKeyboardButton(text="Фото", callback_data=cb.new(post2="device", action="photo", id=did))
             ]
@@ -199,7 +198,10 @@ async def echo(message: types.Message):
         await message.answer("Ничего не найдено")
 
 
-async def download_file(file: types.File, name: str):
-    file_path = file.file_path
+async def download_file(file: types.File, name: str, message: types.Message):
+    # file_path = file.file_path
     destination = r"../photos/" + name
+    image_id = message.photo[len(message.photo) - 1].file_id
+    file_path = (await bot.get_file(image_id)).file_path
+
     await bot.download_file(file_path, destination)
