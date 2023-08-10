@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 commands = (
     ("start", "See if the ship is sailing"),
     ("help", "Get the command list"),
+    ("file", "Загрузка фото на сервер"),
     ("reg", "Get the command list"),
     ("id", "Get the command list"),
 )
