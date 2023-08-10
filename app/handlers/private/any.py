@@ -11,13 +11,11 @@ from aiogram.utils.callback_data import CallbackData
 from app.loader import dp, bot
 from app.config import *
 from app.utils.module import *
-from app.middlewares import rate_limit
 
 
 cb = CallbackData("post", "post2", "id", "action")
 
 
-@rate_limit(15)
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
 async def callbacks(callback: types.CallbackQuery):
     media = types.MediaGroup()
