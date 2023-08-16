@@ -1,16 +1,11 @@
 from loguru import logger
 from aiogram import types
 from aiogram.dispatcher import FSMContext, filters
-from aiogram.dispatcher.filters.state import StatesGroup, State
 from app.loader import dp, bot
 from app.config import *
 from app.middlewares import rate_limit
-
-
-class PhotoDownload(StatesGroup):
-    photo = State()
-    id = State()
-    address = State()
+from app.states.state import PhotoDownload
+from typing import Union
 
 
 # обработчик выхода из машины состояний
