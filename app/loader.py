@@ -17,6 +17,8 @@ dp = Dispatcher(
     storage=storage,
 )
 
+# bot.delete_webhook(drop_pending_updates=True)
+
 __all__ = (
     "bot",
     "storage",
