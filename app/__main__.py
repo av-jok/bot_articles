@@ -1,7 +1,7 @@
 from aiogram import Dispatcher
 from aiogram.utils import executor
 
-from app import utils, config
+from app import utils
 from app.loader import dp
 from app.config import conf
 # The configuration of the modules using import
@@ -15,6 +15,7 @@ async def on_startup(dispatcher: Dispatcher):
 
 
 async def on_sthutdown(dispatcher: Dispatcher):
+    await utils.setup_default_commands(dispatcher)
     # await utils.notify_admins("Bot shutdown", conf.tg_bot.admin_ids)
     return True
 
