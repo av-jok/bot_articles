@@ -5,4 +5,3 @@ requests~=2.31.0
 redis==4.6.0
 SQLAlchemy~=2.0.19
 PyMySQL==1.1.0
-aspose.words==23.7.0
