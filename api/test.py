@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.handler import CancelHandler
 from aiogram.dispatcher.middlewares import BaseMiddleware
 
-bot = Bot(token="TOKEN_HERE")  # Place your token here
+bot = Bot(token="1475930893:AAGpG7Au3FepSnNOoSCYYJRreWOPmjycNuo")  # Place your token here
 dp = Dispatcher(bot)
 
 
