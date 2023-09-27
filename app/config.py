@@ -66,7 +66,7 @@ class Config:
     misc: Miscellaneous
 
 
-def load_config(path: str = None):
+def load_config():
 
     return Config(
         tg_bot=TgBot(
@@ -93,4 +93,4 @@ def load_config(path: str = None):
     )
 
 
-conf = load_config("../data/.env")
+conf = load_config()
