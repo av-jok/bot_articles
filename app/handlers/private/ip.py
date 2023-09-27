@@ -13,6 +13,7 @@ import telnetlib
 async def command_reg_handler(msg: types.Message):
     await msg.answer(main())
 
+
 # edge - 10.0.18.33
 # cisco - 10.0.24.164
 # snr - 10.0.20.3
@@ -62,5 +63,5 @@ def main():
         tn.write(to_bytes("exit"))
         tn.interact()
         return tn.read_all().decode('ascii')
-    except
+    except:
         return 'Ошибка'

@@ -1,11 +1,10 @@
 import logging
-from loguru import logger
+# from loguru import logger
 import re
-import requests
+# import requests
 from aiogram.dispatcher import filters
-from aiogram import types
-
-import aspose.words as aw
+# from aiogram import types
+# import aspose.words as aw
 
 from aiogram.utils.callback_data import CallbackData
 from app.loader import dp, bot
@@ -18,7 +17,7 @@ cb = CallbackData("post", "post2", "id", "action")
 
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
 async def callbacks(callback: types.CallbackQuery):
-    media = types.MediaGroup()
+    # media = types.MediaGroup()
     call = callback.data.split(':')
     post = dict()
     post['type'] = str(call[1])
@@ -32,55 +31,55 @@ async def callbacks(callback: types.CallbackQuery):
             # show_alert=True
         )
 
-    if post['action'] == 'svg':
-        url = conf.misc.netbox_url + "api/dcim/devices/" + post['id'] + "/"
-        response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD)
-        json = response.json()
-        if json['rack'] is not None:
-            # print(json['rack'])
-            list_type = ["front", "rear"]
-            for iterator in list_type:
-                rack = str(json['rack']['id'])
-                side = iterator
-                url = conf.misc.netbox_url + f"api/dcim/racks/{rack}/elevation/?face={side}&render=svg"
-                response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD).content
-
-                filename = f"{rack}_{side}.png"
-
-                logger.debug("Start svg2png")
-                doc = aw.Document()
-                builder = aw.DocumentBuilder(doc)
-                shape = builder.insert_image(response)
-                pagesetup = builder.page_setup
-                pagesetup.page_width = shape.width
-                pagesetup.page_height = shape.height
-                pagesetup.top_margin = 0
-                pagesetup.left_margin = 0
-                pagesetup.bottom_margin = 0
-                pagesetup.right_margin = 0
-                doc.save("../Rack/" + filename)
-                logger.debug("End svg2png")
-
-                media.attach_photo(types.InputFile("../Rack/" + filename, side))
-
-            await types.ChatActions.upload_photo()
-            await callback.message.reply_media_group(media=media)
-            await callback.answer()
-
-        else:
-            return await callback.answer(
-                text=f'Оборудование не привязано к стойке',
-                show_alert=True
-            )
-
-        #     for iterator in json['results']:
-        #         did = iterator['id']
-
-        return await callback.answer(
-            # text=f'Код - {response_list}',
-            # show_alert=True
-            # cairosvg.svg2pdf(url='image.svg', write_to='image.pdf')
-        )
+    # if post['action'] == 'svg':
+    #     url = conf.misc.netbox_url + "api/dcim/devices/" + post['id'] + "/"
+    #     response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD)
+    #     json = response.json()
+    #     if json['rack'] is not None:
+    #         # print(json['rack'])
+    #         list_type = ["front", "rear"]
+    #         for iterator in list_type:
+    #             rack = str(json['rack']['id'])
+    #             side = iterator
+    #             url = conf.misc.netbox_url + f"api/dcim/racks/{rack}/elevation/?face={side}&render=svg"
+    #             response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD).content
+    #
+    #             filename = f"{rack}_{side}.png"
+    #
+    #             logger.debug("Start svg2png")
+    #             doc = aw.Document()
+    #             builder = aw.DocumentBuilder(doc)
+    #             shape = builder.insert_image(response)
+    #             pagesetup = builder.page_setup
+    #             pagesetup.page_width = shape.width
+    #             pagesetup.page_height = shape.height
+    #             pagesetup.top_margin = 0
+    #             pagesetup.left_margin = 0
+    #             pagesetup.bottom_margin = 0
+    #             pagesetup.right_margin = 0
+    #             doc.save("../Rack/" + filename)
+    #             logger.debug("End svg2png")
+    #
+    #             media.attach_photo(types.InputFile("../Rack/" + filename, side))
+    #
+    #         await types.ChatActions.upload_photo()
+    #         await callback.message.reply_media_group(media=media)
+    #         await callback.answer()
+    #
+    #     else:
+    #         return await callback.answer(
+    #             text=f'Оборудование не привязано к стойке',
+    #             show_alert=True
+    #         )
+    #
+    #     #     for iterator in json['results']:
+    #     #         did = iterator['id']
+    #
+    #     return await callback.answer(
+    #         # text=f'Код - {response_list}',
+    #         # show_alert=True
+    #         # cairosvg.svg2pdf(url='image.svg', write_to='image.pdf')
+    #     )
 
     if post['action'] == 'photo':
         photos = get_photo_by_id(post['id'])
@@ -197,7 +196,7 @@ async def echo(message: types.Message):
 
 
 async def download_file(file: types.File, name: str, message: types.Message):
-    # file_path = file.file_path
+    logging.info(file)
     destination = r"../photos/" + name
     image_id = message.photo[len(message.photo) - 1].file_id
     file_path = (await bot.get_file(image_id)).file_path
