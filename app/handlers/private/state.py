@@ -15,10 +15,10 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     if current_state is None:
         return
     await state.finish()
-    await message.answer('Добавление фото отменено!')
+    await message.answer('отменена!')
 
 
-@dp.message_handler(commands="file")
+@dp.message_handler(filters.IDFilter(user_id=USERS), commands="file")
 async def command_reg_handler(message: types.Message):
     await message.answer("Введите инвентарный №")
     await PhotoDownload.id.set()
