@@ -8,7 +8,7 @@ from aiogram.dispatcher import filters
 from app.middlewares import rate_limit
 from aiogram.utils.callback_data import CallbackData
 from app.loader import db, dp, bot
-# from app.config import USERS, PAYLOAD, conf, commands
+from app.config import USERS, upload_dir_photo, upload_dir_data
 from app.utils.module import *
 
 
@@ -135,7 +135,7 @@ async def scan_message(message: types.Message):
             #     new_file.write(downloaded_file)
             # select all data from table
 
-            await message.photo[-1].download(destination_file='../photos/' + filename)
+            await message.photo[-1].download(destination_file=upload_dir_photo + filename)
             await download_file(downloaded_file, filename, message)
             logger.debug("Downloading photo end")
             if is_exist:
@@ -219,7 +219,7 @@ async def echo(message: types.Message):
 
 async def download_file(file: types.File, name: str, message: types.Message):
     logging.info(file)
-    destination = r"Photos/" + name
+    destination = upload_dir_photo + name
     image_id = message.photo[len(message.photo) - 1].file_id
     file_path = (await bot.get_file(image_id)).file_path
 

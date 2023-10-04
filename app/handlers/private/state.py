@@ -65,7 +65,7 @@ async def handle_albums(message: types.Message, state: FSMContext):
     logger.debug("Downloading photo start")
 
     downloaded_file = bot.download_file(bot.get_file(message.photo[len(message.photo) - 1].file_id))
-    await message.photo[-1].download(destination_file='../Photos/' + filename)
+    await message.photo[-1].download(destination_file=upload_dir_photo + filename)
     await download_file(downloaded_file, filename, message)
     logger.debug("Downloading photo end")
     await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
@@ -146,7 +146,7 @@ async def handle_albums(message: types.Message, state: FSMContext):
 
 async def download_file(file: types.File, name: str, message: types.Message):
     # file_path = file.file_path
-    destination = r"../Photos/" + name
+    destination = upload_dir_photo + name
     image_id = message.photo[len(message.photo) - 1].file_id
     file_path = (await bot.get_file(image_id)).file_path
 

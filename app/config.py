@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 from environs import Env
 from sqlalchemy import create_engine
@@ -18,6 +19,10 @@ env.read_env()
 
 USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 1016868504, 361955359, 1292364914, 449155597,
          233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322, 700520296, 700520296}
+
+
+upload_dir_photo = os.path.dirname(os.path.realpath(__file__)) + "/Photo/"
+upload_dir_data = os.path.dirname(os.path.realpath(__file__)) + "/Data/"
 
 PAYLOAD = ''
 HEADERS = {
