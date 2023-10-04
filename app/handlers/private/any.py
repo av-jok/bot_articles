@@ -7,7 +7,7 @@ from aiogram.dispatcher import filters
 # import aspose.words as aw
 
 from aiogram.utils.callback_data import CallbackData
-from app.loader import dp, bot
+from app.loader import dp, bot, db
 from app.config import *
 from app.utils.module import *
 
@@ -106,23 +106,44 @@ async def scan_message(message: types.Message):
             text = str(text[0])
 
             filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
-            text = (f"Инв № - {text}\n"
-                    f"Файл - {filename}\n"
-                    f"Отправил - {message.reply_to_message.from_user.first_name}"
-                    )
+            text_out = (f"Инв № - {text}\n"
+                        f"Файл - {filename}\n"
+                        f"Отправил - {message.reply_to_message.from_user.first_name}"
+                        )
             logger.debug("Downloading photo start")
+
+            with db.cursor() as cursor:
+                select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
+                cursor.execute(select_all_rows)
+                rows = cursor.fetchall()
+                if rows:
+                    is_exist = False
+                else:
+                    insert_query = f"INSERT INTO `bot_photo` (sid, name, tid) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}');"
+                    cursor.execute(insert_query)
+                    try:
+                        db.commit()
+                    except Exception as ex:
+                        print("Error...")
+                        print(ex)
+                    is_exist = True
 
             downloaded_file = bot.download_file(bot.get_file(message.photo[len(message.photo) - 1].file_id))
             # src = '../photos/' + filename
             # with open(src, 'wb') as new_file:
             #     new_file.write(downloaded_file)
+            # select all data from table
+
             await message.photo[-1].download(destination_file='../photos/' + filename)
             await download_file(downloaded_file, filename, message)
             logger.debug("Downloading photo end")
-            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text)
-            # await bot.send_message('252810436', caption=text)
-            # await message.forward('252810436')
-            await message.answer("Принято " + filename)
+            if is_exist:
+                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
+                # await bot.send_message('252810436', caption=text)
+                # await message.forward('252810436')
+                await message.answer("Принято " + filename)
+            else:
+                await message.answer("Такое фото уже есть в базе")
         else:
             await message.answer("Фотография должна быть ответом на Инв свича")
     else:
