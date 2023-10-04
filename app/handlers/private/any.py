@@ -7,7 +7,7 @@ from aiogram.dispatcher import filters
 # import aspose.words as aw
 
 from aiogram.utils.callback_data import CallbackData
-from app.loader import dp, bot, db
+from app.loader import db, dp, bot
 from app.config import *
 from app.utils.module import *
 
@@ -128,7 +128,7 @@ async def scan_message(message: types.Message):
                         print(ex)
                     is_exist = True
 
-            downloaded_file = bot.download_file(bot.get_file(message.photo[len(message.photo) - 1].file_id))
+            downloaded_file = await bot.download_file(bot.get_file(message.photo[len(message.photo) - 1].file_id))
             # src = '../photos/' + filename
             # with open(src, 'wb') as new_file:
             #     new_file.write(downloaded_file)
