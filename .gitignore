@@ -13,6 +13,7 @@ develop-eggs/
 dist/
 !Data/.dummy
 app/Photos/*
+app/Data/*
 Photos/*
 Rack/*
 Data/*
