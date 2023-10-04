@@ -5,10 +5,10 @@ import re
 from aiogram.dispatcher import filters
 # from aiogram import types
 # import aspose.words as aw
-
+from app.middlewares import rate_limit
 from aiogram.utils.callback_data import CallbackData
 from app.loader import db, dp, bot
-from app.config import *
+# from app.config import USERS, PAYLOAD, conf, commands
 from app.utils.module import *
 
 
@@ -96,6 +96,7 @@ async def callbacks(callback: types.CallbackQuery):
     await callback.answer()
 
 
+@rate_limit(10)
 @dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
     logger.debug("Downloading photo")
@@ -218,7 +219,7 @@ async def echo(message: types.Message):
 
 async def download_file(file: types.File, name: str, message: types.Message):
     logging.info(file)
-    destination = r"../Photos/" + name
+    destination = r"Photos/" + name
     image_id = message.photo[len(message.photo) - 1].file_id
     file_path = (await bot.get_file(image_id)).file_path
 
