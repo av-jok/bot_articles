@@ -218,7 +218,7 @@ async def echo(message: types.Message):
 
 async def download_file(file: types.File, name: str, message: types.Message):
     logging.info(file)
-    destination = r"../photos/" + name
+    destination = r"../Photos/" + name
     image_id = message.photo[len(message.photo) - 1].file_id
     file_path = (await bot.get_file(image_id)).file_path
 
