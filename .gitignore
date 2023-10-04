@@ -12,8 +12,9 @@ build/
 develop-eggs/
 dist/
 !Data/.dummy
-Photos/*.jpg
-Rack/*.png
+Photos/*
+Rack/*
+Data/*
 downloads/
 eggs/
 .eggs/
