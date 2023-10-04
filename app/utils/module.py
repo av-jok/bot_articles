@@ -1,8 +1,9 @@
 import requests
-from pprint import pprint
-from loguru import logger
+# from pprint import pprint
+# from loguru import logger
 from aiogram import types
-from app.config import USERS, HEADERS, PAYLOAD, conf
+from app.config import HEADERS, PAYLOAD, conf, upload_dir_data
+# from app.loader import db
 
 
 def get_photo_by_id(ids):
@@ -30,7 +31,7 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos):
 
         # img_data = requests.get(iterator['image']).content
         img_data = requests.request("GET", iterator['image'], headers=HEADERS, data=PAYLOAD).content
-        filename = "../Data/" + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
+        filename = upload_dir_data + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
         with open(filename, 'wb') as photo:
             photo.write(img_data)
         media.attach_photo(types.InputFile(filename, iterator['name']))
@@ -40,3 +41,17 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos):
     await callback.answer()
 
     return True
+
+
+def send_photo_in_base(pid):
+    # TODO Доделать вывод фоток
+
+    # with db.cursor() as cursor:
+    #     select_all_rows = "SELECT * FROM `users`"
+    #     cursor.execute(select_all_rows)
+    #
+    #     rows = cursor.fetchall()
+    #     for row in rows:
+    #         print(row)
+    print("#" * 20)
+    return pid

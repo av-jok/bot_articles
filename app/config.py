@@ -21,7 +21,7 @@ USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 101686
          233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322, 700520296, 700520296}
 
 
-upload_dir_photo = os.path.dirname(os.path.realpath(__file__)) + "/Photo/"
+upload_dir_photo = os.path.dirname(os.path.realpath(__file__)) + "/Photos/"
 upload_dir_data = os.path.dirname(os.path.realpath(__file__)) + "/Data/"
 
 PAYLOAD = ''
@@ -99,3 +99,10 @@ def load_config():
 
 
 conf = load_config()
+
+
+class Switch:
+    def __init__(self, sid, nid):
+        self.id = sid
+        self.nid = nid
+

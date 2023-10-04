@@ -1,6 +1,5 @@
 import logging
 from typing import List, Union
-
 from loguru import logger
 
 
@@ -23,7 +22,7 @@ class InterceptHandler(logging.Handler):
 
 def setup_logger(level: Union[str, int] = "DEBUG", ignored: List[str] = ""):
     logging.basicConfig(handlers=[InterceptHandler()], level=logging.getLevelName(level))
-    logger.add("out.log", backtrace=True, diagnose=True)  # Caution, may leak sensitive data in prod
+    logger.add("out_1.log", backtrace=True, diagnose=True, level='INFO', compression="zip", retention="1 day")
 
     for ignore in ignored:
         logger.disable(ignore)

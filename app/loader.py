@@ -28,4 +28,5 @@ __all__ = (
     "bot",
     "storage",
     "dp",
+    "db",
 )
