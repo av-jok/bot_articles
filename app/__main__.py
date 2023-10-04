@@ -16,7 +16,7 @@ async def on_startup(dispatcher: Dispatcher):
 
 async def on_sthutdown(dispatcher: Dispatcher):
     await utils.setup_default_commands(dispatcher)
-    # await utils.notify_admins("Bot shutdown", conf.tg_bot.admin_ids)
+    await utils.notify_admins("Bot shutdown", conf.tg_bot.admin_ids)
     return True
 
 if __name__ == '__main__':

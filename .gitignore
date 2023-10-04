@@ -17,6 +17,7 @@ app/Data/*
 Photos/*
 Rack/*
 Data/*
+*.log.zip
 downloads/
 eggs/
 .eggs/
