@@ -2,13 +2,13 @@ import requests
 # from pprint import pprint
 # from loguru import logger
 from aiogram import types
-from app.config import HEADERS, PAYLOAD, conf, upload_dir_data
+from app.config import HEADERS, conf
 # from app.loader import db
 
 
 def get_photo_by_id(ids):
     url = conf.misc.netbox_url + "api/extras/image-attachments/?object_id=" + ids
-    response = requests.request("GET", url, headers=HEADERS, data=PAYLOAD)
+    response = requests.request("GET", url, headers=HEADERS, data='')
     json = response.json()
     photos = list()
     if json['count'] > 0:
@@ -23,35 +23,12 @@ def get_photo_by_id(ids):
     else:
         return False
 
-
-async def send_photo_by_id(callback: types.CallbackQuery, photos):
-    media = types.MediaGroup()
-
-    for iterator in photos:
-
-        # img_data = requests.get(iterator['image']).content
-        img_data = requests.request("GET", iterator['image'], headers=HEADERS, data=PAYLOAD).content
-        filename = upload_dir_data + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
-        with open(filename, 'wb') as photo:
-            photo.write(img_data)
-        media.attach_photo(types.InputFile(filename, iterator['name']))
-
-    await types.ChatActions.upload_photo()
-    await callback.message.reply_media_group(media=media)
-    await callback.answer()
-
-    return True
-
-
-def send_photo_in_base(pid):
-    # TODO Доделать вывод фоток
-
-    # with db.cursor() as cursor:
-    #     select_all_rows = "SELECT * FROM `users`"
-    #     cursor.execute(select_all_rows)
-    #
-    #     rows = cursor.fetchall()
-    #     for row in rows:
-    #         print(row)
-    print("#" * 20)
-    return pid
+# media = types.MediaGroup()
+# onlyfiles = [f for f in listdir('photo') if isfile(join('photo', f))]
+# for i in onlyfiles:
+#     photo = 'photo/' + i
+#     media.attach_photo(photo=types.InputFile(path_or_bytesio=photo))
+#
+# bk = InlineKeyboardButton(callback_data='start', text='Назад')
+# bk = InlineKeyboardMarkup(row_width=2).add(bk)
+# await bot.send_media_group(call.from_user.id, media=media)

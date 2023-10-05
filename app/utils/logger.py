@@ -21,7 +21,8 @@ class InterceptHandler(logging.Handler):
 
 
 def setup_logger(level: Union[str, int] = "DEBUG", ignored: List[str] = ""):
-    logging.basicConfig(handlers=[InterceptHandler()], level=logging.getLevelName(level))
+    # logging.basicConfig(handlers=[InterceptHandler()], level=logging.getLevelName(level))
+    logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO)
     logger.add("out.log", backtrace=True, diagnose=True, level='INFO', retention="1 day")
 
     for ignore in ignored:
