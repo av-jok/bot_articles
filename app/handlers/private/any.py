@@ -166,7 +166,7 @@ async def echo(message: types.Message):
                 status = switch.status
 
             msg = (
-                f"Адрес: {switch.name}\n"
+                f"Адрес: {switch.address}\n"
                 f"{switch.rack}\n\n"
                 f"Имя: {switch.name} {status}\n"
                 f"Инв № : {switch.id}\n"

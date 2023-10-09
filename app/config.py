@@ -136,6 +136,7 @@ class Switch:
         self.nid = json['id']
         self.name = json['name'].lower()
         self.device_type = json['device_type']['display']
+        self.address = json['site']['display']
 
         if json['asset_tag']:
             asset_tag = re.findall(r'\d+', json['asset_tag'])
