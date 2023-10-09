@@ -83,56 +83,52 @@ async def callbacks(callback: types.CallbackQuery):
 #     await message.answer_media_group(media_group)
 
 
-@rate_limit(30)
+@rate_limit(1)
 @dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
-    if message.reply_to_message:
-        if re.match('^\\d{5}$', message.reply_to_message.text):
-            text = re.search('^\\d{5}$', message.reply_to_message.text)
-            text = str(text[0])
+    if message.reply_to_message and re.match('^\\d{5}$', message.reply_to_message.text):
+        text = re.search('^\\d{5}$', message.reply_to_message.text)
+        text = str(text[0])
 
-            filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
-            text_out = (f"Инв № - {text}\n"
-                        f"Файл - {filename}\n"
-                        f"Отправил - {message.reply_to_message.from_user.first_name}"
-                        )
-            # logger.debug("Downloading photo start")
-            # switch = Switch(text, text)
+        filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
+        text_out = (f"Инв № - {text}\n"
+                    f"Файл - {filename}\n"
+                    f"Отправил - {message.reply_to_message.from_user.first_name}"
+                    )
+        # logger.debug("Downloading photo start")
+        # switch = Switch(text, text)
 
-            with db.cursor() as cursor:
-                select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
-                cursor.execute(select_all_rows)
-                rows = cursor.fetchall()
-                if rows:
-                    is_exist = False
-                else:
-                    insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
-                    cursor.execute(insert_query)
-                    try:
-                        db.commit()
-                        is_exist = True
-                    except Exception as ex:
-                        logger.debug(ex)
-
-            await message.photo[-1].download(destination_file=upload_dir_photo + filename)
-            destination = upload_dir_photo + filename
-            image_id = message.photo[len(message.photo) - 1].file_id
-            file_path = (await bot.get_file(image_id)).file_path
-            await bot.download_file(file_path, destination)
-
-            if is_exist:
-                if message.from_user.id != 252810436:
-                    await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
-                    # await bot.send_message('252810436', caption=text)
-                    # await message.forward('252810436')
-                await message.answer("Принято " + filename)
+        with db.cursor() as cursor:
+            select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
+            cursor.execute(select_all_rows)
+            rows = cursor.fetchall()
+            if rows:
+                is_exist = False
             else:
-                await message.answer("Такое фото уже есть в базе")
+                insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
+                cursor.execute(insert_query)
+                try:
+                    db.commit()
+                    is_exist = True
+                except Exception as ex:
+                    logger.debug(ex)
 
-            # logger.debug("Downloading photo end")
+        await message.photo[-1].download(destination_file=upload_dir_photo + filename)
+        destination = upload_dir_photo + filename
+        image_id = message.photo[len(message.photo) - 1].file_id
+        file_path = (await bot.get_file(image_id)).file_path
+        await bot.download_file(file_path, destination)
 
+        if is_exist:
+            if message.from_user.id != 252810436:
+                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
+                # await bot.send_message('252810436', caption=text)
+                # await message.forward('252810436')
+            await message.answer("Принято " + filename)
         else:
-            await message.answer("Фотография должна быть ответом на Инв свича")
+            await message.answer("Такое фото уже есть в базе")
+
+        # logger.debug("Downloading photo end")
     else:
         await message.answer("Фотография должна быть ответом на Инв свича")
 

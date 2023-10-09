@@ -6,7 +6,7 @@ from environs import Env
 from sqlalchemy import create_engine
 from requests import request
 # from aiogram import types
-from pprint import pprint
+# from pprint import pprint
 
 # List of commands
 commands = (
@@ -181,8 +181,6 @@ class Switch:
             return None
 
     def get_photo_in_base(self):
-        # TODO Доделать вывод фоток
-
         with self.db.cursor() as cursor:
             select_all_rows = f"SELECT `sid` as pid, `name`, `file_id` as image FROM `bot_photo` WHERE sid='{self.id}'"
             cursor.execute(select_all_rows)

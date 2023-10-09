@@ -8,7 +8,7 @@ from sys import argv
 import telnetlib
 
 
-@rate_limit(15, "ip")
+@rate_limit(5, "ip")
 @dp.message_handler(commands="ip")
 async def command_reg_handler(msg: types.Message):
     await msg.answer(main())
