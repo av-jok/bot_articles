@@ -185,7 +185,6 @@ class Switch:
         with self.db.cursor() as cursor:
             select_all_rows = f"SELECT `sid` as pid, `name`, `file_id` as image FROM `bot_photo` WHERE sid='{self.id}'"
             cursor.execute(select_all_rows)
-
             rows = cursor.fetchall()
 
         if rows:

@@ -14,6 +14,7 @@ db = pymysql.connect(host=conf.db.host,
                      password=conf.db.password,
                      database=conf.db.database,
                      cursorclass=pymysql.cursors.DictCursor)
+db.autocommit(True)
 
 storage = RedisStorage2(host=conf.redis.host, db=conf.redis.database) if conf.tg_bot.use_redis else MemoryStorage()
 
