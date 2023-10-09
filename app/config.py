@@ -113,7 +113,7 @@ class Switch:
     nid: int
     name: str
     device_type: str
-    rack: None
+    rack: str
     status: str
     ip: ipaddress
     address: str
@@ -147,7 +147,7 @@ class Switch:
         if json['rack'] is not None:
             self.rack = json['rack']['name']
         else:
-            self.rack = None
+            self.rack = ' '
 
         self.status = json['status']['label']
 
