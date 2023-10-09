@@ -26,7 +26,7 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
 
     for iterator in photos2:
         filename = upload_dir_photo + str(iterator['name'])
-        pprint(filename)
+        # pprint(filename)
         media.attach_photo(types.InputFile(filename, iterator['name']))
 
     await types.ChatActions.upload_photo()
