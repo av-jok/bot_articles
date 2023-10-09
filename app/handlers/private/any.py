@@ -1,6 +1,5 @@
 from loguru import logger
 import re
-from typing import List
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
