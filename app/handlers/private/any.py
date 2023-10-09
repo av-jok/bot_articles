@@ -17,17 +17,19 @@ sw = Switch(db)
 async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
     media = types.MediaGroup()
 
-    for iterator in photos:
-        img_data = request("GET", iterator['image'], headers=HEADERS, data='').content
-        filename = upload_dir_data + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
-        with open(filename, 'wb') as photo:
-            photo.write(img_data)
-        media.attach_photo(types.InputFile(filename, iterator['name']))
+    if photos is not None:
+        for iterator in photos:
+            img_data = request("GET", iterator['image'], headers=HEADERS, data='').content
+            filename = upload_dir_data + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
+            with open(filename, 'wb') as photo:
+                photo.write(img_data)
+            media.attach_photo(types.InputFile(filename, iterator['name']))
 
-    for iterator in photos2:
-        filename = upload_dir_photo + str(iterator['name'])
-        # pprint(filename)
-        media.attach_photo(types.InputFile(filename, iterator['name']))
+    if photos2 is not None:
+        for iterator in photos2:
+            filename = upload_dir_photo + str(iterator['name'])
+            # pprint(filename)
+            media.attach_photo(types.InputFile(filename, iterator['name']))
 
     await types.ChatActions.upload_photo()
     await callback.message.reply_media_group(media=media)
@@ -97,8 +99,6 @@ async def scan_message(message: types.Message):
                         )
             # logger.debug("Downloading photo start")
             # switch = Switch(text, text)
-
-            pprint(message.photo[-1])
 
             with db.cursor() as cursor:
                 select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"

@@ -177,7 +177,7 @@ class Switch:
                 )
             return photos
         else:
-            return False
+            return None
 
     def get_photo_in_base(self):
         # TODO Доделать вывод фоток
@@ -187,5 +187,8 @@ class Switch:
             cursor.execute(select_all_rows)
 
             rows = cursor.fetchall()
-            # for row in rows:
-        return rows
+
+        if rows:
+            return rows
+        else:
+            return None
