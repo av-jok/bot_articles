@@ -24,9 +24,10 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
             photo.write(img_data)
         media.attach_photo(types.InputFile(filename, iterator['name']))
 
-    # for iterator in photos2:
-        # pass
-        # media.attach_photo(iterator['image'])
+    for iterator in photos2:
+        filename = upload_dir_data + str(iterator['name'])
+        pprint(filename)
+        media.attach_photo(types.InputFile(filename, iterator['name']))
 
     await types.ChatActions.upload_photo()
     await callback.message.reply_media_group(media=media)
@@ -45,8 +46,8 @@ async def callbacks(callback: types.CallbackQuery):
     post['action'] = str(call[3])
 
     switch = sw(post['id'])
-    pprint(switch.images)
-    pprint(switch.images2)
+    # pprint(switch.images)
+    # pprint(switch.images2)
 
     if post['action'] == 'photo':
         if switch.images or switch.images2:

@@ -25,8 +25,9 @@ USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 101686
          233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322, 700520296, 700520296}
 
 
-upload_dir_photo = os.path.dirname(os.path.realpath(__file__)) + "/Photos/"
-upload_dir_data = os.path.dirname(os.path.realpath(__file__)) + "/Data/"
+upload_dir_photo = os.path.dirname(os.path.realpath(__file__)) + "/_Photos/"
+upload_dir_data = os.path.dirname(os.path.realpath(__file__)) + "/_Data/"
+upload_dir_rack = os.path.dirname(os.path.realpath(__file__)) + "/_Rack/"
 
 HEADERS = {
     'Content-Type': 'application/json',
@@ -182,7 +183,7 @@ class Switch:
         # TODO Доделать вывод фоток
 
         with self.db.cursor() as cursor:
-            select_all_rows = f"SELECT `sid` as pid, `file_id` as image FROM `bot_photo` WHERE sid='{self.id}'"
+            select_all_rows = f"SELECT `sid` as pid, `name`, `file_id` as image FROM `bot_photo` WHERE sid='{self.id}'"
             cursor.execute(select_all_rows)
 
             rows = cursor.fetchall()
