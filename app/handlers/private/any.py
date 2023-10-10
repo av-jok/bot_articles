@@ -97,6 +97,7 @@ async def scan_message(message: types.Message):
                     )
         # logger.debug("Downloading photo start")
         # switch = Switch(text, text)
+        db.ping(reconnect=True)
 
         with db.cursor() as cursor:
             select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
