@@ -164,6 +164,9 @@ async def echo(message: types.Message):
             keyboard = types.InlineKeyboardMarkup(row_width=3)
             keyboard.add(*buttons)
 
+            text_out = f"Инв № - {switch.id}\nОтправил - {message.reply_to_message.from_user.first_name}"
+
             await message.answer(msg, reply_markup=keyboard)
+            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
     else:
         await message.answer("Ничего не найдено")
