@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from environs import Env
 from sqlalchemy import create_engine
 from requests import request
+from typing import Union
+
 # from aiogram import types
 # from pprint import pprint
 
@@ -117,7 +119,7 @@ class Switch:
     status: str
     ip: ipaddress
     address: str
-    msg = str
+    msg = Union[str, int]
     json = str
     url = str
     comments = str

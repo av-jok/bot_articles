@@ -8,7 +8,7 @@ from app.loader import db, dp, bot, query_select, query_insert
 from app.middlewares import rate_limit
 from app.config import USERS, HEADERS, conf, upload_dir_photo, upload_dir_data, Switch
 from requests import request
-from pprint import pprint
+# from pprint import pprint
 
 cb = CallbackData("post", "post2", "id", "action")
 sw = Switch(db)
@@ -91,23 +91,14 @@ async def scan_message(message: types.Message):
                     f"Отправил - {message.reply_to_message.from_user.first_name}"
                     )
         # logger.debug("Downloading photo start")
-        # switch = Switch(text, text)
 
         select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
-        # cursor.execute(select_all_rows)
-        # rows = cursor.fetchall()
         rows = query_select(select_all_rows)
 
         if rows:
             is_exist = False
         else:
             insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
-            # cursor.execute(insert_query)
-            # try:
-            #     db.commit()
-            #     is_exist = True
-            # except Exception as ex:
-            #     logger.debug(ex)
             is_exist = query_insert(insert_query)
             logger.debug(f"is_exist = {is_exist}")
 
@@ -120,8 +111,6 @@ async def scan_message(message: types.Message):
         if is_exist:
             if message.from_user.id != 252810436:
                 await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
-                # await bot.send_message('252810436', caption=text)
-                # await message.forward('252810436')
             await message.answer("Принято " + filename)
         else:
             await message.answer("Такое фото уже есть в базе")
@@ -155,17 +144,6 @@ async def echo(message: types.Message):
                     status = '⚰️'
                 case _:
                     status = switch.status
-
-            # if switch.status == 'Active':
-            #     status = '🟢'
-            # elif switch.status == 'Offline':
-            #     status = '🔴'
-            # elif switch.status == 'Inventory':
-            #     status = '📦'
-            # elif switch.status == 'Decommissioning':
-            #     status = '⚰️'
-            # else:
-            #     status = switch.status
 
             msg = (
                 f"Адрес: {switch.address}\n"
