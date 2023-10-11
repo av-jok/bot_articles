@@ -1,5 +1,6 @@
 from loguru import logger
 import re
+import os
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
@@ -53,11 +54,24 @@ async def callbacks(callback: types.CallbackQuery):
     if post['action'] == 'photo':
         if switch.images or switch.images2:
             await send_photo_by_id(callback, switch.images, switch.images2)
+            await callback.answer()
         else:
             await callback.answer(
                 text=f'Фотографии не найдены',
                 show_alert=True
             )
+            await callback.answer()
+        return True
+
+    if post['action'] == 'ping':
+        hostname = switch.ip
+        host = "is down!"
+        response = os.system("ping -c 1 " + hostname + "> /dev/null")
+        if response == 0:
+            host = "is up!"
+
+        await bot.send_message(callback.from_user.id, f"Switch: {switch.name} {host}")
+        await callback.answer()
         return True
 
     await bot.send_message(callback.from_user.id, f"type: {post['type']}\nid: {post['id']}\naction: {post['action']}")
@@ -128,19 +142,30 @@ async def echo(message: types.Message):
 
     if json['count'] > 0:
         for iterator in json['results']:
-
             switch = sw(iterator['id'])
 
-            if switch.status == 'Active':
-                status = '🟢'
-            elif switch.status == 'Offline':
-                status = '🔴'
-            elif switch.status == 'Inventory':
-                status = '📦'
-            elif switch.status == 'Decommissioning':
-                status = '⚰️'
-            else:
-                status = switch.status
+            match switch.status:
+                case 'Active':
+                    status = '🟢'
+                case 'Offline':
+                    status = '🔴'
+                case 'Inventory':
+                    status = '📦'
+                case 'Decommissioning':
+                    status = '⚰️'
+                case _:
+                    status = switch.status
+
+            # if switch.status == 'Active':
+            #     status = '🟢'
+            # elif switch.status == 'Offline':
+            #     status = '🔴'
+            # elif switch.status == 'Inventory':
+            #     status = '📦'
+            # elif switch.status == 'Decommissioning':
+            #     status = '⚰️'
+            # else:
+            #     status = switch.status
 
             msg = (
                 f"Адрес: {switch.address}\n"
@@ -155,7 +180,7 @@ async def echo(message: types.Message):
             buttons = [
                 types.InlineKeyboardButton(text="Device", url=switch.url),
                 # types.InlineKeyboardButton(text="Стойка", callback_data=cb.new(post2="photo", action="svg", id=did)),
-                # types.InlineKeyboardButton(text="Ping", callback_data=cb.new(post2="ip", action="ping", id=ip)),
+                types.InlineKeyboardButton(text="Ping", callback_data=cb.new(post2="ip", action="ping", id=switch.nid)),
                 types.InlineKeyboardButton(text="Фото", callback_data=cb.new(post2="device", action="photo", id=switch.nid))
             ]
             keyboard = types.InlineKeyboardMarkup(row_width=3)
