@@ -3,7 +3,7 @@ import re
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
-from app.loader import db, dp, bot
+from app.loader import db, dp, bot, query_select, query_insert
 from app.middlewares import rate_limit
 from app.config import USERS, HEADERS, conf, upload_dir_photo, upload_dir_data, Switch
 from requests import request
@@ -64,25 +64,6 @@ async def callbacks(callback: types.CallbackQuery):
     await callback.answer()
 
 
-# @dp.message_handler(content_types=types.ContentType.ANY)
-# async def handle_albums(message: types.Message, album: List[types.Message]):
-#     """This handler will receive a complete album of any type."""
-#     media_group = types.MediaGroup()
-#     for obj in album:
-#         if obj.photo:
-#             file_id = obj.photo[-1].file_id
-#         else:
-#             file_id = obj[obj.content_type].file_id
-#
-#         try:
-#             We can also add a caption to each file by specifying `"caption": "text"`
-#             media_group.attach({"media": file_id, "type": obj.content_type})
-#         except ValueError:
-#             return await message.answer("This type of album is not supported by aiogram.")
-#
-#     await message.answer_media_group(media_group)
-
-
 @rate_limit(1)
 @dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
@@ -97,22 +78,24 @@ async def scan_message(message: types.Message):
                     )
         # logger.debug("Downloading photo start")
         # switch = Switch(text, text)
-        db.ping(reconnect=True)
 
-        with db.cursor() as cursor:
-            select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
-            cursor.execute(select_all_rows)
-            rows = cursor.fetchall()
-            if rows:
-                is_exist = False
-            else:
-                insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
-                cursor.execute(insert_query)
-                try:
-                    db.commit()
-                    is_exist = True
-                except Exception as ex:
-                    logger.debug(ex)
+        select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
+        # cursor.execute(select_all_rows)
+        # rows = cursor.fetchall()
+        rows = query_select(select_all_rows)
+
+        if rows:
+            is_exist = False
+        else:
+            insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
+            # cursor.execute(insert_query)
+            # try:
+            #     db.commit()
+            #     is_exist = True
+            # except Exception as ex:
+            #     logger.debug(ex)
+            is_exist = query_insert(insert_query)
+            logger.debug(f"is_exist = {is_exist}")
 
         await message.photo[-1].download(destination_file=upload_dir_photo + filename)
         destination = upload_dir_photo + filename
@@ -128,8 +111,6 @@ async def scan_message(message: types.Message):
             await message.answer("Принято " + filename)
         else:
             await message.answer("Такое фото уже есть в базе")
-
-        # logger.debug("Downloading photo end")
     else:
         await message.answer("Фотография должна быть ответом на Инв свича")
 
