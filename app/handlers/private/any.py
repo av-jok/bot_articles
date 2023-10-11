@@ -66,7 +66,7 @@ async def callbacks(callback: types.CallbackQuery):
     if post['action'] == 'ping':
         hostname = switch.ip
         host = "is down!"
-        response = os.system("ping -c 1 " + hostname + "> /dev/null")
+        response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
         if response == 0:
             host = "is up!"
 
