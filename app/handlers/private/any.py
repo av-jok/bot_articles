@@ -70,7 +70,7 @@ async def callbacks(callback: types.CallbackQuery):
         if response == 0:
             host = "is up!"
 
-        await bot.send_message(callback.from_user.id, f"Switch: {switch.name} {host}")
+        await bot.send_message(callback.from_user.id, f"Switch: {switch.name} {host}", reply_to_message_id=callback.message.message_id)
         await callback.answer()
         return True
 
