@@ -1,5 +1,5 @@
 __author__ = """
-    Forzend Mainer
-    https://github.com/0Kit/
+    AV_Jok
+    https://git.psiline.ru/Joker
 """
-__version__ = '1.0'
+__version__ = '0.1'
