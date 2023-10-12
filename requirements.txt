@@ -8,3 +8,8 @@ PyMySQL==1.1.0
 cryptography==41.0.4
 pynetbox~=7.2.0
 drf_extra_fields
+pysnmp~=4.4.12
+urllib3~=2.0.6
+Django~=4.2.6
+djangorestframework~=3.14.0
+Markdown~=3.5
