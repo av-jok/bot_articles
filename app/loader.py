@@ -34,11 +34,9 @@ def query_select(query):
                                )
         base.autocommit(True)
         try:
-
             with base.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
-
         finally:
             base.close()
 
@@ -64,11 +62,10 @@ def query_insert(query):
                 cursor.execute(query)
                 base.commit()
                 is_true = True
+                base.close()
         except Exception as ex:
             print(ex)
             is_true = False
-        finally:
-            base.close()
 
     except Exception as ex:
         print("Connection refused...")
