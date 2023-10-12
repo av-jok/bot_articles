@@ -82,6 +82,8 @@ class Device:
 
 
 if __name__ == "__main__":
-    name_script, ip, ro, oid = argv
-    device = Device(ip, ro, oid)
+    # name_script, ip, ro, oid = argv
+    # device = Device(ip, ro, oid)
+    device = Device('192.168.82.253', 'public', '1.3.6.1.2.1.2.2.1.7')
+
     print(json.dumps(device.get_ifwalk()))
