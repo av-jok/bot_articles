@@ -3,6 +3,7 @@
 import pynetbox
 import urllib3
 import re
+from trans import transliterate
 
 # from django.core.files.base import ContentFile
 # from rest_framework import serializers
@@ -18,22 +19,25 @@ nb = pynetbox.api(url=netbox_url, token=netbox_api)
 nb.http_session.verify = False
 
 i = 0
-devices = nb.dcim.devices.filter(asset_tag__ic='Инв ', role_id=4)
+devices = nb.dcim.sites.filter(region_id=1)  # asset_tag__ic='авантел', role_id=4, status='offline'
 for device in devices:
-    if re.findall(r"(?<!\d)\d{5}(?!\d)", device.asset_tag):
-        text = re.findall(r"(?<!\d)\d{5}(?!\d)", device.asset_tag)
-        # device.name = device.name.lower()
-        device.asset_tag = text[0]
-        try:
-            device.save()
-            print(device, device.asset_tag, text)
-        except pynetbox.RequestError as e:
-            print(device.asset_tag, e.error)
+    print(device, device.slug, transliterate(device.name))
+    device.slug = transliterate(device.name)
+    # if re.findall(r"(?<!\d)\d{5}(?!\d)", device.asset_tag):
+    #     text = re.findall(r"(?<!\d)\d{5}(?!\d)", device.asset_tag)
+    #     device.name = device.name.lower()
+    #     transliterate = transliterate(device.name)
+    #     device.asset_tag = text[0]
+    #     device.asset_tag = None
+    try:
+        # print(device, device.asset_tag, text)
+        device.save()
+    except pynetbox.RequestError as e:
+        print(device.asset_tag, e.error)
 
-        # if i == 29:
-        #     exit()
-        # i += 1
-
+    if i == 5:
+        exit()
+    i += 1
 
 # img = nb.extras.image_attachments.filter(object_id='1')
 # print(img.id)
