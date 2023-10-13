@@ -124,7 +124,7 @@ async def echo(message: types.Message):
         await message.answer("Запрос должен быть длиннее")
         return False
 
-    url = conf.misc.netbox_url + "api/dcim/devices/?q=" + message.text
+    url = conf.netbox.netbox_url + "api/dcim/devices/?q=" + message.text
     response = request("GET", url, headers=HEADERS, data='')
 
     json = response.json()

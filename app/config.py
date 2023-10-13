@@ -6,7 +6,8 @@ from environs import Env
 from sqlalchemy import create_engine
 from requests import request
 from typing import Union
-
+import pynetbox
+import urllib3
 # from aiogram import types
 # from pprint import pprint
 
@@ -64,9 +65,14 @@ class TgBot:
 
 
 @dataclass
+class NetBox:
+    netbox_url: str = None
+    netbox_api: str = None
+
+
+@dataclass
 class Miscellaneous:
     other_params: str = None
-    netbox_url: str = None
 
 
 @dataclass
@@ -74,6 +80,7 @@ class Config:
     tg_bot: TgBot
     db: DbConfig
     redis: RediConf
+    netbox: NetBox
     misc: Miscellaneous
 
 
@@ -97,14 +104,18 @@ def load_config():
             password=env.str('REDIS_PASSWORD'),
             database=env.str('REDIS_DATABASE')
         ),
-        misc=Miscellaneous(
+        netbox=NetBox(
+            netbox_api=env.str('NETBOX_API'),
             netbox_url=env.str('NETBOX_URL')
-        )
-
+        ),
+        misc=Miscellaneous()
     )
 
 
 conf = load_config()
+urllib3.disable_warnings()
+nb = pynetbox.api(url=conf.netbox.netbox_url, token=conf.netbox.netbox_api)
+nb.http_session.verify = False
 
 
 class Switch:
@@ -129,10 +140,13 @@ class Switch:
         self.db = db
 
     def __call__(self, msg: str):
-        url = conf.misc.netbox_url + "api/dcim/devices/" + str(msg) + "/"
+        url = conf.netbox.netbox_url + "api/dcim/devices/" + str(msg) + "/"
         response = request("GET", url, headers=HEADERS, data='')
 
         json = response.json()
+
+        devices = nb.dcim.devices.filter(id=msg)  # asset_tag__ic='авантел', role_id=4, status='offline'
+        # for device in devices:
 
         # pprint(json['count'])
         self.nid = json['id']
@@ -141,7 +155,7 @@ class Switch:
         self.address = json['site']['display']
 
         if json['asset_tag']:
-            asset_tag = re.findall(r'\d+', json['asset_tag'])
+            asset_tag = re.findall(r"(?<!\d)\d{5}(?!\d)", json['asset_tag'])
             self.id = int(asset_tag[0])
         else:
             self.id = 0
@@ -166,9 +180,12 @@ class Switch:
         return self
 
     def get_photo_in_netbox(self):
-        url = conf.misc.netbox_url + "api/extras/image-attachments/?object_id=" + str(self.nid)
+        url = conf.netbox.netbox_url + "api/extras/image-attachments/?object_id=" + str(self.nid)
         response = request("GET", url, headers=HEADERS, data='')
         json = response.json()
+
+        img = nb.extras.image_attachments.filter(object_id=self.nid)  # asset_tag__ic='авантел', role_id=4, status='offline'
+
         photos = list()
         if json['count'] > 0:
             for iterator in json['results']:
