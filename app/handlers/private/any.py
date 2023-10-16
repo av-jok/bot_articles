@@ -83,6 +83,7 @@ async def callbacks(callback: types.CallbackQuery):
 @dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
     if message.reply_to_message and re.match('^\\d{5}$', message.reply_to_message.text):
+        is_exist = False
         text = re.search('^\\d{5}$', message.reply_to_message.text)
         text = str(text[0])
 
@@ -99,18 +100,14 @@ async def scan_message(message: types.Message):
 
         rows = query_select(select_all_rows)
 
-        if row:
-            is_exist = False
-        else:
+        if not row:
             insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
             cur = db.query(insert_query)
             cur.commit()
             is_exist = True
             logger.debug(f"is_exist = {is_exist}")
 
-        if rows:
-            is_exist = False
-        else:
+        if not rows:
             insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
             is_exist = query_insert(insert_query)
             logger.debug(f"is_exist = {is_exist}")
