@@ -6,12 +6,13 @@ from aiogram.dispatcher import filters
 from aiogram import types
 from app.loader import db, dp, bot, query_select, query_insert
 from app.middlewares import rate_limit
-from app.config import USERS, HEADERS, conf, upload_dir_photo, upload_dir_data, Switch
+from app.config import DB, USERS, HEADERS, conf, upload_dir_photo, upload_dir_data, Switch
 from requests import request
 # from pprint import pprint
 
 cb = CallbackData("post", "post2", "id", "action")
 sw = Switch(db)
+db = DB()
 
 
 async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
@@ -93,7 +94,19 @@ async def scan_message(message: types.Message):
         # logger.debug("Downloading photo start")
 
         select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
+        cur = db.query(select_all_rows)
+        row = cur.fetchall()
+
         rows = query_select(select_all_rows)
+
+        if row:
+            is_exist = False
+        else:
+            insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
+            cur = db.query(insert_query)
+            cur.commit()
+            is_exist = True
+            logger.debug(f"is_exist = {is_exist}")
 
         if rows:
             is_exist = False

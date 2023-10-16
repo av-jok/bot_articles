@@ -6,6 +6,7 @@ from environs import Env
 from sqlalchemy import create_engine
 from requests import request
 from typing import Union
+import pymysql
 import pynetbox
 import urllib3
 # from aiogram import types
@@ -25,8 +26,8 @@ env = Env()
 env.read_env()
 
 USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 1016868504, 361955359, 1292364914, 449155597,
-         233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322, 700520296, 700520296}
-
+         233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322,
+         700520296, 700520296}
 
 upload_dir_photo = os.path.dirname(os.path.realpath(__file__)) + "/_Photos/"
 upload_dir_data = os.path.dirname(os.path.realpath(__file__)) + "/_Data/"
@@ -39,6 +40,29 @@ HEADERS = {
 
 engine = create_engine("mysql+pymysql://root:pass@localhost/mydb")
 # engine.connect()
+
+
+class DB:
+    conn = None
+
+    def connect(self):
+        self.conn = pymysql.connect(host=conf.db.host,
+                                    user=conf.db.user,
+                                    password=conf.db.password,
+                                    database=conf.db.database,
+                                    cursorclass=pymysql.cursors.DictCursor
+                                    )
+        self.conn.autocommit(True)
+
+    def query(self, sql):
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(sql)
+        except (AttributeError, pymysql.Error):
+            self.connect()
+            cursor = self.conn.cursor()
+            cursor.execute(sql)
+        return cursor
 
 
 @dataclass
@@ -85,7 +109,6 @@ class Config:
 
 
 def load_config():
-
     return Config(
         tg_bot=TgBot(
             token=env.str("BOT_TOKEN"),
@@ -119,7 +142,6 @@ nb.http_session.verify = False
 
 
 class Switch:
-
     """Заполняет данные по свичам"""
     db: None
     id: int
@@ -184,7 +206,8 @@ class Switch:
         response = request("GET", url, headers=HEADERS, data='')
         json = response.json()
 
-        img = nb.extras.image_attachments.filter(object_id=self.nid)  # asset_tag__ic='авантел', role_id=4, status='offline'
+        img = nb.extras.image_attachments.filter(
+            object_id=self.nid)  # asset_tag__ic='авантел', role_id=4, status='offline'
 
         photos = list()
         if json['count'] > 0:
