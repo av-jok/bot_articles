@@ -5,7 +5,7 @@ from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
 from app.loader import db, dp, bot, query_select, query_insert
-from app.middlewares import rate_limit
+# from app.middlewares import rate_limit
 from app.config import DB, USERS, HEADERS, conf, upload_dir_photo, upload_dir_data, Switch
 from requests import request
 # from pprint import pprint
@@ -51,6 +51,7 @@ async def callbacks(callback: types.CallbackQuery):
     switch = sw(post['id'])
     # pprint(switch.images)
     # pprint(switch.images2)
+    logger.debug(f"action == {post['action']}")
 
     if post['action'] == 'photo':
         if switch.images or switch.images2:
@@ -79,7 +80,7 @@ async def callbacks(callback: types.CallbackQuery):
     await callback.answer()
 
 
-@rate_limit(1)
+# @rate_limit(1)
 @dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
     if message.reply_to_message and re.match('^\\d{5}$', message.reply_to_message.text):
@@ -171,6 +172,7 @@ async def echo(message: types.Message):
                 types.InlineKeyboardButton(text="Ping", callback_data=cb.new(post2="ip", action="ping", id=switch.nid)),
                 types.InlineKeyboardButton(text="Фото", callback_data=cb.new(post2="device", action="photo", id=switch.nid))
             ]
+            logger.debug(f"{switch.nid}")
             keyboard = types.InlineKeyboardMarkup(row_width=3)
             keyboard.add(*buttons)
 

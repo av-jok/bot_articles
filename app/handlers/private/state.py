@@ -3,7 +3,7 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext, filters
 from app.loader import dp, bot
 from app.config import *
-from app.middlewares import rate_limit
+# from app.middlewares import rate_limit
 from app.states.state import PhotoDownload
 from typing import Union
 
@@ -49,7 +49,7 @@ async def get_photo(message: types.Message, state: FSMContext):
 #     await state.finish()
 
 
-@rate_limit(5)
+# @rate_limit(5)
 @dp.message_handler(filters.IDFilter(user_id=USERS), state=PhotoDownload.photo, content_types=types.ContentType.PHOTO)
 async def handle_albums(message: types.Message, state: FSMContext):
     """This handler will receive a complete album of any type."""
