@@ -1,7 +1,6 @@
 import logging
 from aiogram import Bot, Dispatcher, executor
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery, Message
-from aiogram.utils.callback_data import CallbackData
 
 logging.basicConfig(level=logging.DEBUG)
 bot = Bot(token="1323680830:AAHMuqFWXGsyYuab9rTXtVfjUYEd1iDm2Xc")
