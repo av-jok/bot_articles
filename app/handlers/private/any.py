@@ -10,7 +10,7 @@ from app.config import DB, USERS, HEADERS, conf, upload_dir_photo, upload_dir_da
 from requests import request
 # from pprint import pprint
 
-cb = CallbackData("post", "post2", "id", "action")
+cb = CallbackData("post", "id", "action")
 sw = Switch(db)
 db = DB()
 
@@ -169,8 +169,8 @@ async def echo(message: types.Message):
             buttons = [
                 types.InlineKeyboardButton(text="Device", url=switch.url),
                 # types.InlineKeyboardButton(text="Стойка", callback_data=cb.new(post2="photo", action="svg", id=did)),
-                types.InlineKeyboardButton(text="Ping", callback_data=cb.new(post2="ip", action="ping", id=switch.nid)),
-                types.InlineKeyboardButton(text="Фото", callback_data=cb.new(post2="device", action="photo", id=switch.nid))
+                types.InlineKeyboardButton(text="Ping", callback_data=cb.new(action="ping", id=switch.nid)),
+                types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", id=switch.nid))
             ]
             logger.debug(f"{switch.nid}")
             keyboard = types.InlineKeyboardMarkup(row_width=3)
