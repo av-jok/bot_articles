@@ -104,7 +104,7 @@ async def scan_message(message: types.Message):
         if not row:
             insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
             cur = db.query(insert_query)
-            cur.commit()
+            # cur.commit()
             is_exist = True
             logger.debug(f"is_exist = {is_exist}")
 
