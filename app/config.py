@@ -3,11 +3,10 @@ import re
 import ipaddress
 from dataclasses import dataclass
 from environs import Env
-from sqlalchemy import create_engine
 from requests import request
 from typing import Union
-import pymysql
 import pynetbox
+import pymysql
 import urllib3
 # from aiogram import types
 # from pprint import pprint
@@ -38,31 +37,31 @@ HEADERS = {
     'Authorization': 'Token 7f50ada4a4a66d4b2385e4f8f59a069bc219089b'
 }
 
-engine = create_engine("mysql+pymysql://root:pass@localhost/mydb")
+# engine = create_engine("mysql+pymysql://root:pass@localhost/mydb")
 # engine.connect()
 
 
-class DB:
-    conn = None
-
-    def connect(self):
-        self.conn = pymysql.connect(host=conf.db.host,
-                                    user=conf.db.user,
-                                    password=conf.db.password,
-                                    database=conf.db.database,
-                                    cursorclass=pymysql.cursors.DictCursor
-                                    )
-        self.conn.autocommit(True)
-
-    def query(self, sql):
-        try:
-            cursor = self.conn.cursor()
-            cursor.execute(sql)
-        except (AttributeError, pymysql.Error):
-            self.connect()
-            cursor = self.conn.cursor()
-            cursor.execute(sql)
-        return cursor
+# class DB:
+#     conn = None
+#
+#     def connect(self):
+#         self.conn = pymysql.connect(host=conf.db.host,
+#                                     user=conf.db.user,
+#                                     password=conf.db.password,
+#                                     database=conf.db.database,
+#                                     cursorclass=pymysql.cursors.DictCursor
+#                                     )
+#         self.conn.autocommit(True)
+#
+#     def query(self, sql):
+#         try:
+#             cursor = self.conn.cursor()
+#             cursor.execute(sql)
+#         except (AttributeError, pymysql.Error):
+#             self.connect()
+#             cursor = self.conn.cursor()
+#             cursor.execute(sql)
+#         return cursor
 
 
 @dataclass
@@ -141,6 +140,28 @@ nb = pynetbox.api(url=conf.netbox.netbox_url, token=conf.netbox.netbox_api)
 nb.http_session.verify = False
 
 
+def query_select(query):
+    try:
+        base = pymysql.connect(host=conf.db.host,
+                               user=conf.db.user,
+                               password=conf.db.password,
+                               database=conf.db.database,
+                               cursorclass=pymysql.cursors.DictCursor
+                               )
+        base.autocommit(True)
+        try:
+            with base.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+        finally:
+            base.close()
+
+    except Exception as ex:
+        print("Connection refused...")
+        print(ex)
+    return rows
+
+
 class Switch:
     """Заполняет данные по свичам"""
     db: None
@@ -158,17 +179,14 @@ class Switch:
     comments = str
     images: list
 
-    def __init__(self, db):
-        self.db = db
+    def __init__(self):
+        self.db = None
 
     def __call__(self, msg: str):
         url = conf.netbox.netbox_url + "api/dcim/devices/" + str(msg) + "/"
         response = request("GET", url, headers=HEADERS, data='')
 
         json = response.json()
-
-        devices = nb.dcim.devices.filter(id=msg)  # asset_tag__ic='авантел', role_id=4, status='offline'
-        # for device in devices:
 
         # pprint(json['count'])
         self.nid = json['id']
@@ -206,9 +224,6 @@ class Switch:
         response = request("GET", url, headers=HEADERS, data='')
         json = response.json()
 
-        img = nb.extras.image_attachments.filter(
-            object_id=self.nid)  # asset_tag__ic='авантел', role_id=4, status='offline'
-
         photos = list()
         if json['count'] > 0:
             for iterator in json['results']:
@@ -223,10 +238,11 @@ class Switch:
             return None
 
     def get_photo_in_base(self):
-        with self.db.cursor() as cursor:
-            select_all_rows = f"SELECT `sid` as pid, `name`, `file_id` as image FROM `bot_photo` WHERE sid='{self.id}'"
-            cursor.execute(select_all_rows)
-            rows = cursor.fetchall()
+        # with self.db.cursor() as cursor:
+        select_all_rows = f"SELECT `sid` as pid, `name`, `file_id` as image FROM `bot_photo` WHERE sid='{self.id}'"
+        rows = query_select(select_all_rows)
+        # cursor.execute(select_all_rows)
+        # rows = cursor.fetchall()
 
         if rows:
             return rows

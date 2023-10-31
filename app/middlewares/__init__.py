@@ -8,6 +8,6 @@ from app.loader import dp
 if __name__ == "app.middlewares":
     dp.middleware.setup(LoggingMiddleware())
     # dp.middleware.setup(ThrottlingMiddleware())
-    dp.middleware.setup(AlbumMiddleware())
+    # dp.middleware.setup(AlbumMiddleware())
 
     logger.info('Middlewares are successfully configured')
