@@ -108,11 +108,6 @@ async def scan_message(message: types.Message):
             is_exist = True
             logger.debug(f"is_exist = {is_exist}")
 
-        if not rows:
-            insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
-            is_exist = query_insert(insert_query)
-            logger.debug(f"is_exist = {is_exist}")
-
         await message.photo[-1].download(destination_file=upload_dir_photo + filename)
         destination = upload_dir_photo + filename
         image_id = message.photo[len(message.photo) - 1].file_id
