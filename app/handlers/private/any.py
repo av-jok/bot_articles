@@ -1,3 +1,5 @@
+import logging
+
 from loguru import logger
 import re
 import os
@@ -28,7 +30,6 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
     if photos2 is not None:
         for iterator in photos2:
             filename = upload_dir_photo + str(iterator['name'])
-            # pprint(filename)
             media.attach_photo(types.InputFile(filename, iterator['name']))
 
     await types.ChatActions.upload_photo()
@@ -39,18 +40,16 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
 
 
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
-async def callbacks(callback: types.CallbackQuery):
-    # media = types.MediaGroup()
-    call = callback.data.split(':')
+async def callbacks(callback: types.CallbackQuery, callback_data: dict):
     post = dict()
-    post['type'] = str(call[1])
-    post['id'] = call[2]
-    post['action'] = str(call[3])
+    post['id'] = callback_data.get('id')
+    post['action'] = callback_data.get('action')
 
-    switch = sw(post['id'])
-    # pprint(switch.images)
-    # pprint(switch.images2)
+    logger.debug(f"{callback_data}")
     logger.debug(f"action == {post['action']}")
+
+    switch = sw(callback_data.get('id'))
+    logger.debug(f"action == {post}")
 
     if post['action'] == 'photo':
         if switch.images or switch.images2:

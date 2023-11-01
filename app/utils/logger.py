@@ -1,3 +1,4 @@
+import sys
 import logging
 from typing import List, Union
 from loguru import logger
@@ -21,9 +22,10 @@ class InterceptHandler(logging.Handler):
 
 
 def setup_logger(level: Union[str, int] = "DEBUG", ignored: List[str] = ""):
-    # logging.basicConfig(handlers=[InterceptHandler()], level=logging.getLevelName(level))
     logging.basicConfig(handlers=[InterceptHandler()], level=logging.DEBUG)
-    logger.add("out.log", backtrace=True, diagnose=True, level='INFO', retention="1 day")
+    # logger.add("out.log", backtrace=True, diagnose=True, level='INFO', retention="1 day")
+
+    logger.add("Xpyngel_1.log", backtrace=True, diagnose=True, level=level, rotation="1 MB")
 
     for ignore in ignored:
         logger.disable(ignore)

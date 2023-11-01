@@ -15,9 +15,6 @@ import urllib3
 commands = (
     ("start", "See if the ship is sailing"),
     ("help", "Get the command list"),
-    ("ip", "Проверка по IP адресу"),
-    ("file", "Загрузка фото на сервер"),
-    ("reg", "Get the command list"),
     ("id", "Get the command list"),
 )
 
