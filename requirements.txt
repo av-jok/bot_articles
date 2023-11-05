@@ -3,11 +3,10 @@ environs==9.5.0
 loguru==0.7.2
 requests~=2.31.0
 redis==5.0.1
-SQLAlchemy==2.0.22
+SQLAlchemy==2.0.23
 PyMySQL==1.1.0
 cryptography==41.0.5
 pynetbox~=7.2.0
-drf_extra_fields
 pysnmp~=4.4.12
 urllib3==2.0.7
-Markdown~=3.5
+python-nmap

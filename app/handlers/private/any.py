@@ -1,5 +1,4 @@
 import logging
-
 from loguru import logger
 import re
 import os
@@ -7,10 +6,8 @@ from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
 from app.loader import dp, bot, query_select, query_insert
-# from app.middlewares import rate_limit
 from app.config import USERS, HEADERS, conf, upload_dir_photo, upload_dir_data, Switch
 from requests import request
-# from pprint import pprint
 
 cb = CallbackData("post", "id", "action")
 sw = Switch()
@@ -44,23 +41,14 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
     post = dict()
     post['id'] = callback_data.get('id')
     post['action'] = callback_data.get('action')
-
-    logger.debug(f"{callback_data}")
-    logger.debug(f"action == {post['action']}")
-
-    switch = sw(callback_data.get('id'))
-    logger.debug(f"action == {post}")
+    switch = sw(post['id'])
 
     if post['action'] == 'photo':
         if switch.images or switch.images2:
             await send_photo_by_id(callback, switch.images, switch.images2)
             await callback.answer()
         else:
-            await callback.answer(
-                text=f'Фотографии не найдены',
-                show_alert=True
-            )
-            await callback.answer()
+            await callback.answer(text="Фотографии не найдены", show_alert=True)
         return True
 
     if post['action'] == 'ping':
@@ -85,28 +73,19 @@ async def scan_message(message: types.Message):
         is_exist = False
         text = re.search('^\\d{5}$', message.reply_to_message.text)
         text = str(text[0])
-        # logger.debug(f"{message.photo}")
+        # switch = sw('id')
 
         filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
         text_out = (f"Инв № - {text}\n"
                     f"Файл - {filename}\n"
                     f"Отправил - {message.reply_to_message.from_user.first_name}"
                     )
-        # logger.debug("Downloading photo start")
-
         select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
-        # cur = db.query(select_all_rows)
-        # row = cur.fetchall()
-
         row = query_select(select_all_rows)
-
-        # logger.debug(f"{row}")
 
         if not row:
             insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
             query_insert(insert_query)
-            # cur = db.query(insert_query)
-            # cur.commit()
             is_exist = True
             logger.debug(f"is_exist = {is_exist}")
 
@@ -116,10 +95,18 @@ async def scan_message(message: types.Message):
         file_path = (await bot.get_file(image_id)).file_path
         await bot.download_file(file_path, destination)
 
+        # buttons = [
+        #     types.InlineKeyboardButton(text="Device", url=switch.url),
+        #     types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", id=switch.nid))
+        # ]
+        # keyboard = types.InlineKeyboardMarkup(row_width=3)
+        # keyboard.add(*buttons)
+
         if is_exist:
-            if message.from_user.id != 252810436:
-                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
-            await message.answer("Принято " + filename)
+            # if message.from_user.id != 252810436:
+            #     await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out, reply_markup=keyboard)
+            # await message.answer("Принято " + filename)
+            await bot.send_message(message.from_user.id, f"Принято {filename}", reply_to_message_id=message.reply_to_message)
         else:
             await message.answer("Такое фото уже есть в базе")
     else:
