@@ -84,7 +84,7 @@ async def scan_message(message: types.Message):
         row = query_select(select_all_rows)
 
         if not row:
-            insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
+            insert_query = f"INSERT INTO `bot_photo` (sid, name, tid, file_id, upload) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}',{message.reply_to_message.from_user.first_name});"
             query_insert(insert_query)
             is_exist = True
             logger.debug(f"is_exist = {is_exist}")
