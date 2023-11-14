@@ -55,7 +55,7 @@ def remove(source):
 
 
 with db.cursor() as cursor:
-    cursor.execute("SELECT `name` FROM `bot_photo`")
+    cursor.execute("SELECT `id`, `name` FROM `bot_photo`")
     rows = cursor.fetchall()
 
 # sql = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
@@ -66,9 +66,13 @@ results = diff_dir_with_array("/home/joker/git/bot_articles/app/_Photos/", rows)
 for i in results:
     print(f"Файл существует, нет в базе {i}")
     replace(f"/home/joker/git/bot_articles/app/_Photos/{i}", f"/home/joker/old/{i}")
-    remove(f"/home/joker/sftp/app/_Photos/{i}")
+    # remove(f"/home/joker/sftp/app/_Photos/{i}")
 
 
 results = diff_array_with_dir("/home/joker/git/bot_articles/app/_Photos", rows)
-for i in results:
-    print(f"В базе существует, нет файла {i}")
+with db.cursor() as cursor:
+
+    for i in results:
+        print(f"В базе существует, нет файла {i}")
+        cursor.execute(f"DELETE FROM test.bot_photo WHERE `name`='{i}'")
+db.commit()
