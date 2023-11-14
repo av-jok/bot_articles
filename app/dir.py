@@ -38,6 +38,22 @@ def diff_array_with_dir(directory, array):
     return [x for x in old_files if x not in new_files]
 
 
+def replace(source, destination):
+    try:
+        os.rename(source, destination)
+    except OSError as f:
+        print(f)
+        return
+
+
+def remove(source):
+    try:
+        os.unlink(source)
+    except OSError as f:
+        print(f)
+        return
+
+
 with db.cursor() as cursor:
     cursor.execute("SELECT `name` FROM `bot_photo`")
     rows = cursor.fetchall()
@@ -46,9 +62,12 @@ with db.cursor() as cursor:
 # cursor.execute(sql)
 # db.commit()
 
-results = diff_dir_with_array("/home/joker/git/bot_articles/app/_Photos", rows)
+results = diff_dir_with_array("/home/joker/git/bot_articles/app/_Photos/", rows)
 for i in results:
     print(f"Файл существует, нет в базе {i}")
+    replace(f"/home/joker/git/bot_articles/app/_Photos/{i}", f"/home/joker/old/{i}")
+    remove(f"/home/joker/sftp/app/_Photos/{i}")
+
 
 results = diff_array_with_dir("/home/joker/git/bot_articles/app/_Photos", rows)
 for i in results:
