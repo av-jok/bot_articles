@@ -1,4 +1,5 @@
 import os
+import re
 from pprint import pprint
 
 
@@ -11,5 +12,14 @@ def diff_dir_with_filelist(directory, filepath):
     return [x for x in new_files if x not in old_files]
 
 
-results = diff_dir_with_filelist("_Photos/", "./bot_photo_202311131157.txt")
-pprint(results)
+results = diff_dir_with_filelist("_Photos/", "./bot_photo.csv")
+out = []
+
+for i in results:
+    b = re.match('^\\d{5}', i)
+    out.append({'id':b[0], 'file':i})
+    print(f"{b[0]};{i}")
+
+# pprint(out)
+
+
