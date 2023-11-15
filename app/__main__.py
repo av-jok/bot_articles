@@ -22,8 +22,8 @@ async def on_sthutdown(dispatcher: Dispatcher):
 if __name__ == '__main__':
     # utils.setup_logger("INFO", ["sqlalchemy.engine", "aiogram.bot.api", "aiogram.contrib.middlewares.logging"])
     # utils.setup_logger("DEBUG", ["sqlalchemy.engine", "aiogram.bot.api"])
-    # utils.setup_logger("DEBUG", ["aiogram.bot.api"])
-    utils.setup_logger("INFO", [])
+    utils.setup_logger("INFO", ["aiogram.bot.api"])
+    # utils.setup_logger("INFO", [])
 
     executor.start_polling(
         dp, on_startup=on_startup, on_shutdown=on_sthutdown, skip_updates=conf.tg_bot.skip_updates
