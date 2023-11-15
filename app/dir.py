@@ -67,12 +67,12 @@ for i in results:
     # replace(f"/home/joker/git/bot_articles/app/_Photos/{i}", f"/home/joker/old/{i}")
     # remove(f"/home/joker/sftp/app/_Photos/{i}")
 
-    text = re.search('^\\d{5}', i)
+    # text = re.search('^\\d{5}', i)
     # pprint(text[0])
-    sql = f"INSERT INTO `bot_photo` (sid, name) VALUES ('{text[0]}', '{i}');"
-    with db.cursor() as cursor:
-        cursor.execute(sql)
-    db.commit()
+    # sql = f"INSERT INTO `bot_photo` (sid, name) VALUES ('{text[0]}', '{i}');"
+    # with db.cursor() as cursor:
+    #     cursor.execute(sql)
+    # db.commit()
 
 
 results = diff_array_with_dir("/home/joker/git/bot_articles/app/_Photos", rows)
