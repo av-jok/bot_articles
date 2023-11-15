@@ -1,4 +1,4 @@
-import logging
+# import logging
 from loguru import logger
 import re
 import os
@@ -6,10 +6,17 @@ from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
 from app.loader import dp, bot, query_select, query_insert
-from app.config import USERS, HEADERS, conf, upload_dir_photo, upload_dir_data, Switch
+from app.config import USERS, HEADERS, conf, Switch
 from requests import request
 
-cb = CallbackData("post", "id", "action")
+cb = CallbackData("post", "action", "value")
+
+
+class IdButton(CallbackData, prefix="post"):
+    action: str
+    value: str
+
+
 sw = Switch()
 
 
@@ -19,14 +26,14 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
     if photos is not None:
         for iterator in photos:
             img_data = request("GET", iterator['image'], headers=HEADERS, data='').content
-            filename = upload_dir_data + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
+            filename = conf.tg_bot.upload_dir_data + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
             with open(filename, 'wb') as photo:
                 photo.write(img_data)
             media.attach_photo(types.InputFile(filename, iterator['name']))
 
     if photos2 is not None:
         for iterator in photos2:
-            filename = upload_dir_photo + str(iterator['name'])
+            filename = conf.tg_bot.upload_dir_photo + str(iterator['name'])
             media.attach_photo(types.InputFile(filename, iterator['name']))
 
     await types.ChatActions.upload_photo()
@@ -39,11 +46,11 @@ async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
 async def callbacks(callback: types.CallbackQuery, callback_data: dict):
     post = dict()
-    post['id'] = callback_data.get('id')
     post['action'] = callback_data.get('action')
-    switch = sw(post['id'])
+    post['value'] = callback_data.get('value')
+    switch = sw(callback_data.get('value'))
 
-    if post['action'] == 'photo':
+    if callback_data.get('action') == 'photo':
         if switch.images or switch.images2:
             await send_photo_by_id(callback, switch.images, switch.images2)
             await callback.answer()
@@ -51,7 +58,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
             await callback.answer(text="Фотографии не найдены", show_alert=True)
         return True
 
-    if post['action'] == 'ping':
+    if callback_data.get('action') == 'ping':
         hostname = switch.ip
         host = "is down!"
         response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
@@ -62,7 +69,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
         await callback.answer()
         return True
 
-    await bot.send_message(callback.from_user.id, f"type: {post['type']}\nid: {post['id']}\naction: {post['action']}")
+    await bot.send_message(callback.from_user.id, f"value: {post['value']}\naction: {post['action']}")
     await callback.answer()
 
 
@@ -89,8 +96,8 @@ async def scan_message(message: types.Message):
             is_exist = True
             logger.debug(f"is_exist = {is_exist}")
 
-        await message.photo[-1].download(destination_file=upload_dir_photo + filename)
-        destination = upload_dir_photo + filename
+        await message.photo[-1].download(destination_file=conf.tg_bot.upload_dir_photo + filename)
+        destination = conf.tg_bot.upload_dir_photo + filename
         image_id = message.photo[len(message.photo) - 1].file_id
         file_path = (await bot.get_file(image_id)).file_path
         await bot.download_file(file_path, destination)
@@ -153,8 +160,8 @@ async def echo(message: types.Message):
             buttons = [
                 types.InlineKeyboardButton(text="Device", url=switch.url),
                 # types.InlineKeyboardButton(text="Стойка", callback_data=cb.new(post2="photo", action="svg", id=did)),
-                types.InlineKeyboardButton(text="Ping", callback_data=cb.new(action="ping", id=switch.nid)),
-                types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", id=switch.nid))
+                types.InlineKeyboardButton(text="Ping", callback_data=cb.new(action="ping", value=switch.nid)),
+                types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=switch.nid))
             ]
             logger.debug(f"{switch.nid}")
             keyboard = types.InlineKeyboardMarkup(row_width=3)

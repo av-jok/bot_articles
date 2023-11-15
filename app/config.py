@@ -26,41 +26,6 @@ USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 101686
          233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322,
          700520296, 700520296}
 
-upload_dir_photo = os.path.dirname(os.path.realpath(__file__)) + "/_Photos/"
-upload_dir_data = os.path.dirname(os.path.realpath(__file__)) + "/_Data/"
-upload_dir_rack = os.path.dirname(os.path.realpath(__file__)) + "/_Rack/"
-
-HEADERS = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Token 7f50ada4a4a66d4b2385e4f8f59a069bc219089b'
-}
-
-# engine = create_engine("mysql+pymysql://root:pass@localhost/mydb")
-# engine.connect()
-
-
-# class DB:
-#     conn = None
-#
-#     def connect(self):
-#         self.conn = pymysql.connect(host=conf.db.host,
-#                                     user=conf.db.user,
-#                                     password=conf.db.password,
-#                                     database=conf.db.database,
-#                                     cursorclass=pymysql.cursors.DictCursor
-#                                     )
-#         self.conn.autocommit(True)
-#
-#     def query(self, sql):
-#         try:
-#             cursor = self.conn.cursor()
-#             cursor.execute(sql)
-#         except (AttributeError, pymysql.Error):
-#             self.connect()
-#             cursor = self.conn.cursor()
-#             cursor.execute(sql)
-#         return cursor
-
 
 @dataclass
 class DbConfig:
@@ -83,6 +48,9 @@ class TgBot:
     admin_ids: list[int]
     use_redis: bool
     skip_updates: bool
+    upload_dir_photo: str
+    upload_dir_data: str
+    upload_dir_rack: str
 
 
 @dataclass
@@ -113,7 +81,10 @@ def load_config():
             token=env.str("BOT_TOKEN"),
             admin_ids=list(map(int, env.list("SUPERUSER_IDS"))),
             use_redis=env.bool("USE_REDIS"),
-            skip_updates=env.bool("SKIP_UPDATES")
+            skip_updates=env.bool("SKIP_UPDATES"),
+            upload_dir_photo=os.path.dirname(os.path.realpath(__file__)) + "/_Photos/",
+            upload_dir_data=os.path.dirname(os.path.realpath(__file__)) + "/_Data/",
+            upload_dir_rack=os.path.dirname(os.path.realpath(__file__)) + "/_Rack/"
         ),
         db=DbConfig(
             host=env.str('DB_HOST'),
@@ -140,6 +111,11 @@ conf = load_config()
 urllib3.disable_warnings()
 nb = pynetbox.api(url=conf.netbox.netbox_url, token=conf.netbox.netbox_api)
 nb.http_session.verify = False
+
+HEADERS = {
+    'Content-Type': 'application/json',
+    'Authorization': f'Token {conf.netbox.netbox_api}'
+}
 
 
 def query_select(query):
