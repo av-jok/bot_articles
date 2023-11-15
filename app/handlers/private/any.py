@@ -70,7 +70,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
 @dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
     if message.reply_to_message and re.match('^\\d{5}$', message.reply_to_message.text):
-        is_exist = True
+        is_exist = False
         text = re.search('^\\d{5}$', message.reply_to_message.text)
         text = str(text[0])
         # switch = sw('id')
@@ -86,7 +86,7 @@ async def scan_message(message: types.Message):
         if not row:
             insert_query = f"INSERT INTO `bot_photo` (`sid`, `name`, `tid`, `file_id`, `upload`) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}',{message.reply_to_message.from_user.first_name});"
             query_insert(insert_query)
-            is_exist = False
+            is_exist = True
             logger.debug(f"is_exist = {is_exist}")
 
         await message.photo[-1].download(destination_file=upload_dir_photo + filename)
@@ -103,8 +103,8 @@ async def scan_message(message: types.Message):
         # keyboard.add(*buttons)
 
         if is_exist:
-            # if message.from_user.id != 252810436:
-            #     await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out, reply_markup=keyboard)
+            if message.from_user.id != 252810436:
+                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
             # await message.answer("Принято " + filename)
             await bot.send_message(message.from_user.id, f"Принято {filename}", reply_to_message_id=message.reply_to_message)
         else:

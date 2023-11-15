@@ -1,4 +1,7 @@
 import os
+import re
+from pprint import pprint
+
 import pymysql
 from app.config import conf
 
@@ -58,15 +61,18 @@ with db.cursor() as cursor:
     cursor.execute("SELECT `id`, `name` FROM `bot_photo`")
     rows = cursor.fetchall()
 
-# sql = f"INSERT INTO `bot_photo` (sid, name, tid, file_id) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}');"
-# cursor.execute(sql)
-# db.commit()
-
 results = diff_dir_with_array("/home/joker/git/bot_articles/app/_Photos/", rows)
 for i in results:
     print(f"Файл существует, нет в базе {i}")
-    replace(f"/home/joker/git/bot_articles/app/_Photos/{i}", f"/home/joker/old/{i}")
+    # replace(f"/home/joker/git/bot_articles/app/_Photos/{i}", f"/home/joker/old/{i}")
     # remove(f"/home/joker/sftp/app/_Photos/{i}")
+
+    text = re.search('^\\d{5}', i)
+    # pprint(text[0])
+    sql = f"INSERT INTO `bot_photo` (sid, name) VALUES ('{text[0]}', '{i}');"
+    with db.cursor() as cursor:
+        cursor.execute(sql)
+    db.commit()
 
 
 results = diff_array_with_dir("/home/joker/git/bot_articles/app/_Photos", rows)
