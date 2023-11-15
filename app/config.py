@@ -3,7 +3,8 @@ import re
 import ipaddress
 from dataclasses import dataclass
 from environs import Env
-from requests import request
+# from requests import request
+import requests
 from typing import Union
 import pynetbox
 import pymysql
@@ -88,6 +89,8 @@ class TgBot:
 class NetBox:
     netbox_url: str = None
     netbox_api: str = None
+    netbox_login: str = None
+    netbox_pass: str = None
 
 
 @dataclass
@@ -125,7 +128,9 @@ def load_config():
         ),
         netbox=NetBox(
             netbox_api=env.str('NETBOX_API'),
-            netbox_url=env.str('NETBOX_URL')
+            netbox_url=env.str('NETBOX_URL'),
+            netbox_login=env.str('NETBOX_LOGIN'),
+            netbox_pass=env.str('NETBOX_PASS')
         ),
         misc=Miscellaneous()
     )
@@ -159,6 +164,36 @@ def query_select(query):
     return rows
 
 
+def upload_photo(nid, file):
+    url = conf.netbox.netbox_url
+    client = requests.session()
+    client.get(url)
+    csrftoken = client.cookies['csrftoken']
+    login_data = dict(
+        username=conf.netbox.netbox_login,
+        password=conf.netbox.netbox_pass,
+        csrfmiddlewaretoken=csrftoken,
+        next=f"/extras/image-attachments/add/?content_type=19&object_id={nid}"
+    )
+    r = client.post(f"{url}/login/", data=login_data, headers=dict(Referer=url))
+
+    csrftoken = r.cookies['csrftoken']
+    res = client.get(
+        f"{url}/extras/image-attachments/add/?content_type=19&object_id={nid}",
+        data={'csrftoken': csrftoken, 'csrfmiddlewaretoken': csrftoken},
+        headers=dict(Referer=url)
+    )
+
+    csrftoken = res.cookies['csrftoken']
+    res = client.post(
+        f"{url}/extras/image-attachments/add/?content_type=19&object_id={nid}",
+        files={'image': open(file, 'rb')},
+        data={'name': '', 'csrfmiddlewaretoken': csrftoken},
+        headers=dict(Referer=url)
+    )
+    return res.status_code
+
+
 class Switch:
     """Заполняет данные по свичам"""
     db: None
@@ -181,7 +216,7 @@ class Switch:
 
     def __call__(self, msg: str):
         url = conf.netbox.netbox_url + "api/dcim/devices/" + str(msg) + "/"
-        response = request("GET", url, headers=HEADERS, data='')
+        response = requests.request("GET", url, headers=HEADERS, data='')
 
         json = response.json()
 
@@ -218,7 +253,7 @@ class Switch:
 
     def get_photo_in_netbox(self):
         url = conf.netbox.netbox_url + "api/extras/image-attachments/?object_id=" + str(self.nid)
-        response = request("GET", url, headers=HEADERS, data='')
+        response = requests.request("GET", url, headers=HEADERS, data='')
         json = response.json()
 
         photos = list()

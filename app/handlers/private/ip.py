@@ -1,14 +1,12 @@
 from aiogram import types
-from aiogram.dispatcher.filters import CommandStart
-from aiogram.utils.markdown import hcode
+# from aiogram.dispatcher.filters import CommandStart
+# from aiogram.utils.markdown import hcode
 from app.loader import dp
-from app.middlewares import rate_limit
 
 from sys import argv
 import telnetlib
 
 
-@rate_limit(5, "ip")
 @dp.message_handler(commands="ip")
 async def command_reg_handler(msg: types.Message):
     await msg.answer(main())
