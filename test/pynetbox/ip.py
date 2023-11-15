@@ -13,7 +13,7 @@ nb = pynetbox.api(url=netbox_url, token=netbox_api)
 nb.http_session.verify = False
 
 dev_type = nb.dcim.device_types.get(slug="3750g-48ts")
-dev_role = nb.dcim.device_roles.get(slug="management-switch")
+dev_role = nb.dcim.device_roles.get(slug="switch")
 dev_site = nb.dcim.sites.get(slug="kampala-dc-01")
 
 ip_search = nb.ipam.ip_addresses.filter(address='10.0.96.2')
