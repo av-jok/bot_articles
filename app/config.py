@@ -164,36 +164,6 @@ def query_select(query):
     return rows
 
 
-def upload_photo(nid, file):
-    url = conf.netbox.netbox_url
-    client = requests.session()
-    client.get(url)
-    csrftoken = client.cookies['csrftoken']
-    login_data = dict(
-        username=conf.netbox.netbox_login,
-        password=conf.netbox.netbox_pass,
-        csrfmiddlewaretoken=csrftoken,
-        next=f"/extras/image-attachments/add/?content_type=19&object_id={nid}"
-    )
-    r = client.post(f"{url}/login/", data=login_data, headers=dict(Referer=url))
-
-    csrftoken = r.cookies['csrftoken']
-    res = client.get(
-        f"{url}/extras/image-attachments/add/?content_type=19&object_id={nid}",
-        data={'csrftoken': csrftoken, 'csrfmiddlewaretoken': csrftoken},
-        headers=dict(Referer=url)
-    )
-
-    csrftoken = res.cookies['csrftoken']
-    res = client.post(
-        f"{url}/extras/image-attachments/add/?content_type=19&object_id={nid}",
-        files={'image': open(file, 'rb')},
-        data={'name': '', 'csrfmiddlewaretoken': csrftoken},
-        headers=dict(Referer=url)
-    )
-    return res.status_code
-
-
 class Switch:
     """Заполняет данные по свичам"""
     db: None
@@ -250,6 +220,36 @@ class Switch:
         self.images2 = self.get_photo_in_base()
 
         return self
+
+    @staticmethod
+    def send_photo_in_netbox(nid, file):
+        url = conf.netbox.netbox_url
+        client = requests.session()
+        client.get(url)
+        csrftoken = client.cookies['csrftoken']
+        login_data = dict(
+            username=conf.netbox.netbox_login,
+            password=conf.netbox.netbox_pass,
+            csrfmiddlewaretoken=csrftoken,
+            next=f"/extras/image-attachments/add/?content_type=19&object_id={nid}"
+        )
+        r = client.post(f"{url}/login/", data=login_data, headers=dict(Referer=url))
+
+        csrftoken = r.cookies['csrftoken']
+        res = client.get(
+            f"{url}/extras/image-attachments/add/?content_type=19&object_id={nid}",
+            data={'csrftoken': csrftoken, 'csrfmiddlewaretoken': csrftoken},
+            headers=dict(Referer=url)
+        )
+
+        csrftoken = res.cookies['csrftoken']
+        res = client.post(
+            f"{url}/extras/image-attachments/add/?content_type=19&object_id={nid}",
+            files={'image': open(file, 'rb')},
+            data={'name': '', 'csrfmiddlewaretoken': csrftoken},
+            headers=dict(Referer=url)
+        )
+        return res.status_code
 
     def get_photo_in_netbox(self):
         url = conf.netbox.netbox_url + "api/extras/image-attachments/?object_id=" + str(self.nid)
