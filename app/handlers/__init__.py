@@ -4,6 +4,7 @@ from .errors import retry_after
 from .errors import errors
 # from .private import ip
 from .private import state
+from .private import new_switch
 from .private import start
 
 from .private import any

@@ -10,13 +10,6 @@ from app.config import USERS, HEADERS, conf, Switch
 from requests import request
 
 cb = CallbackData("post", "action", "value")
-
-
-class IdButton(CallbackData, prefix="post"):
-    action: str
-    value: str
-
-
 sw = Switch()
 
 
