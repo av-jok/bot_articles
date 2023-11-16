@@ -87,7 +87,7 @@ async def scan_message(message: types.Message):
             insert_query = f"INSERT INTO `bot_photo` (`sid`, `name`, `tid`, `file_id`, `upload`) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}','{message.reply_to_message.from_user.first_name}');"
             query_insert(insert_query)
             is_exist = True
-            logger.debug(f"is_exist = {is_exist}")
+            # logger.debug(f"is_exist = {is_exist}")
 
         await message.photo[-1].download(destination_file=conf.tg_bot.upload_dir_photo + filename)
         destination = conf.tg_bot.upload_dir_photo + filename

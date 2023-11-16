@@ -83,53 +83,20 @@ for i in results:
     # replace(f"/home/joker/git/bot_articles/app/_Photos/{i}", f"/home/joker/old/{i}")
     # remove(f"/home/joker/sftp/app/_Photos/{i}")
 
-    blob_value = open(f"{conf.tg_bot.upload_dir_photo}{i}", "rb").read()
-    text = re.search('^\\d{5}', i)
+    # blob_value = open(f"{conf.tg_bot.upload_dir_photo}{i}", "rb").read()
+    # text = re.search('^\\d{5}', i)
     # pprint(text[0])
-    # sql = f"UPDATE test.bot_photo SET `images` = %s WHERE `name`=%s;"
-    # args = (blob_value, i)
+    # sql = f"INSERT INTO test.bot_photo(`sid`, `name`) VALUES(%s, %s);"
+    # args = (text[0], i)
     # with db.cursor() as cursor:
     #     cursor.execute(sql, args)
     # db.commit()
 
 
 results = diff_array_with_dir(conf.tg_bot.upload_dir_photo, rows)
-with db.cursor() as cursor:
-
-    for i in results:
-        print(f"В базе существует, нет файла {i}")
-        cursor.execute(f"DELETE FROM test.bot_photo WHERE `name`='{i}'")
-db.commit()
-
-from aiogram import Bot, Dispatcher, executor, types
-from aiogram.dispatcher.filters.builtin import IDFilter
-
-bot = Bot(config.TOKEN)
-dp = Dispatcher(bot)
-
-
-@dp.message_handler(commands=['start'])
-async def start_cmd(message: types.Message):
-    await message.reply(text='Hello!')
-
-
-@dp.message_handler(commands=['secret'],
-                    user_id=config.mylist)  # user_id - the simlest way to use IDFilter. Another way is like IDFilter(config.mylist), but put it before commands argument.
-async def secret(message: types.Message):
-    await message.answer(text='Hello, it is a secret message only for ids in mylist!!!')
-
-
-@dp.message_handler(commands=['clear'])
-async def clear(message: types.Message):
-    config.mylist = []
-    await message.reply(f'Mylist is empty now: {", ".join([str(id) for id in config.mylist])}')
-
-
-@dp.message_handler(commands=['add_me'])
-async def add_me(message: types.Message):
-    config.mylist.append(message.from_user.id)
-    await message.answer(f'Your id was added to mylist: {", ".join([str(id) for id in config.mylist])}')
-
-
-if __name__ == '__main__':
-    executor.start_polling(dp)
+# with db.cursor() as cursor:
+#
+#     for i in results:
+#         print(f"В базе существует, нет файла {i}")
+#         cursor.execute(f"DELETE FROM test.bot_photo WHERE `name`='{i}'")
+# db.commit()
