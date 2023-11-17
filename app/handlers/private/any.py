@@ -103,8 +103,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
         return True
 
     if callback_data.get('action') == 'ping':
-        hostname = 'ya.ru'
-        # hostname = switch.ip
+        hostname = device.primary_ip
         host = "is down!"
         response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
         if response == 0:
