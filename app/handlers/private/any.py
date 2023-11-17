@@ -74,18 +74,20 @@ async def scan_message(message: types.Message):
         text = re.search('^\\d{5}$', message.reply_to_message.text)
         text = str(text[0])
         # switch = sw('id')
-        response = nb.dcim.devices.get(asset_tag=text)
-        pprint(response)
-
-        nid = ''
+        try:
+            switch = nb.dcim.devices.get(asset_tag=text)
+            print(switch, switch.asset_tag, text)
+        except nb.RequestError as e:
+            pprint(e.error)
+            switch = False
 
         filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
         text_out = (f"Инв № - {text}\n"
                     f"Файл - {filename}\n"
                     f"Отправил - {message.reply_to_message.from_user.first_name}"
                     )
-        if nid:
-            text_out += f"Netbox - {nid}"
+        if switch:
+            text_out += f"Netbox - {switch}"
 
         select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
         row = query_select(select_all_rows)
