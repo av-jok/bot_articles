@@ -1,12 +1,12 @@
-# import logging
 from loguru import logger
 import re
 import os
+from pprint import pprint
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
 from app.loader import dp, bot, query_select, query_insert
-from app.config import USERS, HEADERS, conf, Switch
+from app.config import USERS, HEADERS, conf, Switch, nb
 from requests import request
 
 cb = CallbackData("post", "action", "value")
@@ -74,12 +74,19 @@ async def scan_message(message: types.Message):
         text = re.search('^\\d{5}$', message.reply_to_message.text)
         text = str(text[0])
         # switch = sw('id')
+        response = nb.dcim.devices.get(asset_tag=text)
+        pprint(response)
+
+        nid = ''
 
         filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
         text_out = (f"Инв № - {text}\n"
                     f"Файл - {filename}\n"
                     f"Отправил - {message.reply_to_message.from_user.first_name}"
                     )
+        if nid:
+            text_out += f"Netbox - {nid}"
+
         select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
         row = query_select(select_all_rows)
 
