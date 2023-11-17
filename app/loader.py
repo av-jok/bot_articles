@@ -9,13 +9,6 @@ bot = Bot(
     parse_mode=types.ParseMode.HTML,
 )
 
-# db = pymysql.connect(host=conf.db.host,
-#                      user=conf.db.user,
-#                      password=conf.db.password,
-#                      database=conf.db.database,
-#                      cursorclass=pymysql.cursors.DictCursor)
-# db.autocommit(True)
-
 storage = RedisStorage2(host=conf.redis.host, db=conf.redis.database) if conf.tg_bot.use_redis else MemoryStorage()
 
 dp = Dispatcher(
@@ -24,29 +17,7 @@ dp = Dispatcher(
 )
 
 
-def query_select(query):
-    try:
-        base = pymysql.connect(host=conf.db.host,
-                               user=conf.db.user,
-                               password=conf.db.password,
-                               database=conf.db.database,
-                               cursorclass=pymysql.cursors.DictCursor
-                               )
-        base.autocommit(True)
-        try:
-            with base.cursor() as cursor:
-                cursor.execute(query)
-                rows = cursor.fetchall()
-        finally:
-            base.close()
-
-    except Exception as ex:
-        print("Connection refused...")
-        print(ex)
-    return rows
-
-
-def query_insert(query):
+def query_insert(query, args):
     is_true = None
 
     try:
@@ -59,7 +30,7 @@ def query_insert(query):
         base.autocommit(True)
         try:
             with base.cursor() as cursor:
-                cursor.execute(query)
+                cursor.execute(query, args)
                 base.commit()
                 is_true = True
                 base.close()
@@ -73,7 +44,6 @@ def query_insert(query):
 
     return is_true
 
-
 # bot.delete_webhook(drop_pending_updates=True)
 
 
@@ -81,6 +51,5 @@ __all__ = (
     "bot",
     "storage",
     "dp",
-    "query_select",
     "query_insert",
 )

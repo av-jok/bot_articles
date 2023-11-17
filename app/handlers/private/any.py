@@ -1,39 +1,20 @@
-from loguru import logger
+import time
+import pymysql
+import pynetbox
+import requests
 import re
 import os
+from typing import Any
+from loguru import logger
 from pprint import pprint
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
-from app.loader import dp, bot, query_select, query_insert
-from app.config import USERS, HEADERS, conf, Switch, nb
+from app.loader import dp, bot, query_insert
+from app.config import USERS, HEADERS, conf, nb
 from requests import request
 
-cb = CallbackData("post", "action", "value")
-sw = Switch()
-
-
-async def send_photo_by_id(callback: types.CallbackQuery, photos, photos2):
-    media = types.MediaGroup()
-
-    if photos is not None:
-        for iterator in photos:
-            img_data = request("GET", iterator['image'], headers=HEADERS, data='').content
-            filename = conf.tg_bot.upload_dir_data + str(iterator['object_id']) + "_" + str(iterator['pid']) + ".jpg"
-            with open(filename, 'wb') as photo:
-                photo.write(img_data)
-            media.attach_photo(types.InputFile(filename, iterator['name']))
-
-    if photos2 is not None:
-        for iterator in photos2:
-            filename = conf.tg_bot.upload_dir_photo + str(iterator['name'])
-            media.attach_photo(types.InputFile(filename, iterator['name']))
-
-    await types.ChatActions.upload_photo()
-    await callback.message.reply_media_group(media=media)
-    await callback.answer()
-
-    return True
+cb = CallbackData("post", "action", "value", "id")
 
 
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
@@ -41,62 +22,142 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
     post = dict()
     post['action'] = callback_data.get('action')
     post['value'] = callback_data.get('value')
-    switch = sw(callback_data.get('value'))
+    post['id'] = callback_data.get('id')
+
+    await callback.answer()
+    device = nb.dcim.devices.get(id=callback_data.get('value'))
+
+    if callback_data.get('action') == 'upload':
+        await bot.send_message(callback.from_user.id, f"{post}")
+        url = conf.netbox.netbox_url
+        filename = conf.tg_bot.upload_dir_photo + callback_data.get('id')
+
+        client = requests.session()
+
+        client.get(url)
+        csrftoken = client.cookies['csrftoken']
+        login_data = dict(
+                username=conf.netbox.netbox_login,
+                password=conf.netbox.netbox_pass,
+                csrfmiddlewaretoken=csrftoken,
+                next=f"/"
+            )
+        r = client.post(f"{url}/login/", data=login_data, headers=dict(Referer=url))
+
+        csrftoken = r.cookies['csrftoken']
+        res = client.get(
+                f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
+                data={'csrftoken': csrftoken, 'csrfmiddlewaretoken': csrftoken},
+                headers=dict(Referer=url)
+        )
+
+        csrftoken = res.cookies['csrftoken']
+        res = client.post(
+                f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
+                files={'image': open(filename, 'rb')},
+                data={'name': '', 'csrfmiddlewaretoken': csrftoken},
+                headers=dict(Referer=url)
+            )
+        return res.status_code
 
     if callback_data.get('action') == 'photo':
-        if switch.images or switch.images2:
-            await send_photo_by_id(callback, switch.images, switch.images2)
-            await callback.answer()
+        db = pymysql.connect(host=conf.db.host,
+                             user=conf.db.user,
+                             password=conf.db.password,
+                             database=conf.db.database,
+                             # cursorclass=pymysql.cursors.DictCursor
+                             )
+        with db.cursor() as cursor:
+            cursor.execute(f"SELECT COUNT(`sid`) as cnt from bot_photo bp WHERE `sid`={device.asset_tag}")
+            cnt_db = cursor.fetchone()
+            cnt_db = int(cnt_db[0])
+
+        media = types.MediaGroup()
+        cnt_nb = nb.extras.image_attachments.count(object_id=callback_data.get('value'))
+        logger.debug(f"Фото: в НБ - {cnt_nb}, в БД - {str(cnt_db)}")
+
+        if cnt_nb > 0 or cnt_db > 0:
+            if cnt_nb > 0:
+                imgs = nb.extras.image_attachments.filter(object_id=callback_data.get('value'))
+                for item in imgs:
+                    img_data = request("GET", item.image, headers=HEADERS, data='').content
+                    filename = conf.tg_bot.upload_dir_data + str(item.object_id) + "_" + str(item.id) + ".jpg"
+                    with open(filename, 'wb') as photo:
+                        photo.write(img_data)
+                    media.attach_photo(types.InputFile(filename, item.name))
+            if cnt_db > 0:
+                with db.cursor() as cursor:
+                    query = f"SELECT `name` FROM `bot_photo` WHERE sid='{device.asset_tag}'"
+                    cursor.execute(query)
+                    rows = cursor.fetchall()
+                for row in rows:
+                    filename = conf.tg_bot.upload_dir_photo + str(row[0])
+                    media.attach_photo(types.InputFile(filename, device.name))
+                db.close()
+                pass
+
+            await types.ChatActions.upload_photo()
+            await callback.message.reply_media_group(media=media)
         else:
             await callback.answer(text="Фотографии не найдены", show_alert=True)
         return True
 
     if callback_data.get('action') == 'ping':
-        hostname = switch.ip
+        hostname = 'ya.ru'
+        # hostname = switch.ip
         host = "is down!"
         response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
         if response == 0:
             host = "is up!"
 
-        await bot.send_message(callback.from_user.id, f"Switch: {switch.name} {host}", reply_to_message_id=callback.message.message_id)
-        await callback.answer()
+        await bot.send_message(callback.from_user.id, f"Switch: {hostname} {host}",
+                               reply_to_message_id=callback.message.message_id)
         return True
 
-    await bot.send_message(callback.from_user.id, f"value: {post['value']}\naction: {post['action']}")
-    await callback.answer()
+    await bot.send_message(callback.from_user.id, f"value: {post['value']}\naction: {post['action']}\n\n{post}")
 
 
-# @rate_limit(1)
 @dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
+    device: Any
+    db = pymysql.connect(host=conf.db.host,
+                         user=conf.db.user,
+                         password=conf.db.password,
+                         database=conf.db.database,
+                         # cursorclass=pymysql.cursors.DictCursor
+                         )
+
     if message.reply_to_message and re.match('^\\d{5}$', message.reply_to_message.text):
         is_exist = False
-        text = re.search('^\\d{5}$', message.reply_to_message.text)
-        text = str(text[0])
-        # switch = sw('id')
+        asset_tag = re.search('^\\d{5}$', message.reply_to_message.text)
+        asset_tag = str(asset_tag[0])
+
         try:
-            switch = nb.dcim.devices.get(asset_tag=text)
-            print(switch, switch.asset_tag, text)
-        except nb.RequestError as e:
+            device = nb.dcim.devices.get(asset_tag=asset_tag)
+        except pynetbox.RequestError as e:
             pprint(e.error)
-            switch = False
+            device = False
 
-        filename = text + '-' + message.photo[-1].file_unique_id + '.jpg'
-        text_out = (f"Инв № - {text}\n"
+        filename = asset_tag + '-' + message.photo[-1].file_unique_id + '.jpg'
+        text_out = (f"Инв № - {asset_tag}\n"
                     f"Файл - {filename}\n"
-                    f"Отправил - {message.reply_to_message.from_user.first_name}"
+                    f"Отправил - {message.reply_to_message.from_user.first_name}\n"
                     )
-        if switch:
-            text_out += f"Netbox - {switch}"
+        logger.debug(f"!!!!!!! switch = {device}")
+        if device:
+            text_out += f"Netbox - {device.id}"
 
-        select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{text}' LIMIT 1"
-        row = query_select(select_all_rows)
+        select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{asset_tag}' LIMIT 1"
+        with db.cursor() as cursor:
+            cursor.execute(select_all_rows)
+            row = cursor.fetchone()
 
         if not row:
-            insert_query = f"INSERT INTO `bot_photo` (`sid`, `name`, `tid`, `file_id`, `upload`) VALUES ('{text}', '{filename}', '{message.photo[-1].file_unique_id}', '{message.photo[-1].file_id}','{message.reply_to_message.from_user.first_name}');"
-            query_insert(insert_query)
+            args = (asset_tag, filename, message.photo[-1].file_unique_id, message.photo[-1].file_id, message.reply_to_message.from_user.first_name)
+            insert_query = f"INSERT INTO `bot_photo` (`sid`, `name`, `tid`, `file_id`, `upload`) VALUES (%s, %s, %s, %s, %s);"
+            query_insert(insert_query, args)
             is_exist = True
-            # logger.debug(f"is_exist = {is_exist}")
+        logger.debug(f"is_exist = {is_exist}")
 
         await message.photo[-1].download(destination_file=conf.tg_bot.upload_dir_photo + filename)
         destination = conf.tg_bot.upload_dir_photo + filename
@@ -104,22 +165,58 @@ async def scan_message(message: types.Message):
         file_path = (await bot.get_file(image_id)).file_path
         await bot.download_file(file_path, destination)
 
-        # buttons = [
-        #     types.InlineKeyboardButton(text="Device", url=switch.url),
-        #     types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", id=switch.nid))
-        # ]
-        # keyboard = types.InlineKeyboardMarkup(row_width=3)
-        # keyboard.add(*buttons)
+        keyboard = types.InlineKeyboardMarkup(row_width=3)
+        if device.id:
+            keyboard.add(types.InlineKeyboardButton(text="Device", url=device.url))
+            keyboard.add(types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
+            keyboard.add(types.InlineKeyboardButton(text="Залить", callback_data=cb.new(action="upload", value=device.id, id=filename)))
 
         if is_exist:
-            if message.from_user.id != 252810436:
-                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out)
-            # await message.answer("Принято " + filename)
-            await bot.send_message(message.from_user.id, f"Принято {filename}", reply_to_message_id=message.reply_to_message)
+            # if message.from_user.id != 252810436:
+            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out, reply_markup=keyboard)
+            await bot.send_message(message.from_user.id, f"Принято {filename}",
+                                   reply_to_message_id=message.reply_to_message)
         else:
             await message.answer("Такое фото уже есть в базе")
     else:
         await message.answer("Фотография должна быть ответом на Инв свича")
+    db.close()
+
+
+def iterate_devices(device):
+    match device.status.value:
+        case 'active':
+            status = '🟢'
+        case 'offline':
+            status = '🔴'
+        case 'inventory':
+            status = '📦'
+        case 'decommissioning':
+            status = '⚰️'
+        case _:
+            status = device.status.value
+
+    msg = (
+        f"<b>Адрес:</b> {device.site}\n"
+        f"<b>Стойка:</b> {device.rack}\n\n"
+        f"<b>Имя:</b> {device.name} {status}\n"
+        f"<b>Инв </b>: {device.asset_tag}\n"
+        f"<b>Модель:</b> {device.device_type}\n"
+        f"<b>IP:</b> {device.primary_ip}\n"
+        f"<b>NID:</b> {device.id}\n\n"
+        f"<b>Comment:</b>\n\n<pre>{device.comments}</pre>"
+    )
+
+    buttons = [
+        types.InlineKeyboardButton(text="Device", url=device.url.replace('/api/', '/')),
+        types.InlineKeyboardButton(text="Ping", callback_data=cb.new(action="ping", value=device.id, id='')),
+        types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id=''))
+    ]
+    # logger.debug(f"{device.id}")
+    keyboard = types.InlineKeyboardMarkup(row_width=3)
+    keyboard.add(*buttons)
+
+    return msg, keyboard
 
 
 @dp.message_handler(filters.IDFilter(user_id=USERS))
@@ -128,47 +225,34 @@ async def echo(message: types.Message):
         await message.answer("Запрос должен быть длиннее")
         return False
 
-    url = conf.netbox.netbox_url + "api/dcim/devices/?q=" + message.text
-    response = request("GET", url, headers=HEADERS, data='')
-
-    json = response.json()
-
-    if json['count'] > 0:
-        for iterator in json['results']:
-            switch = sw(iterator['id'])
-
-            match switch.status:
-                case 'Active':
-                    status = '🟢'
-                case 'Offline':
-                    status = '🔴'
-                case 'Inventory':
-                    status = '📦'
-                case 'Decommissioning':
-                    status = '⚰️'
-                case _:
-                    status = switch.status
-
-            msg = (
-                f"Адрес: {switch.address}\n"
-                f"{switch.rack}\n\n"
-                f"Имя: {switch.name} {status}\n"
-                f"Инв № : {switch.id}\n"
-                f"{switch.device_type}\n"
-                f"{switch.ip}\n\n"    
-                f"{switch.comments}"
-            )
-
-            buttons = [
-                types.InlineKeyboardButton(text="Device", url=switch.url),
-                # types.InlineKeyboardButton(text="Стойка", callback_data=cb.new(post2="photo", action="svg", id=did)),
-                types.InlineKeyboardButton(text="Ping", callback_data=cb.new(action="ping", value=switch.nid)),
-                types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=switch.nid))
-            ]
-            logger.debug(f"{switch.nid}")
-            keyboard = types.InlineKeyboardMarkup(row_width=3)
-            keyboard.add(*buttons)
-
-            await message.answer(msg, reply_markup=keyboard)
+    if re.match('^\\d{5}$', message.text) or re.match('^0\\d{4}$', message.text):
+        text = re.match('^\\d{5}$', message.text) or re.match('^0\\d{4}$', message.text)
+        devices = nb.dcim.devices.get(asset_tag=text[0])
+        cnt = nb.dcim.devices.count(asset_tag=text[0])
+    elif re.search("^[0-9a-zA-Z_\-]*$", message.text):
+        text = re.match('^[0-9a-zA-Z_\-]*$', message.text)
+        devices = nb.dcim.devices.filter(name__ic=text[0], role_id={2, 3, 4})
+        # cnt = nb.dcim.devices.count(name__ic=text[0], role_id={2, 3, 4})
+        cnt = False
+    else:
+        sites = nb.dcim.sites.filter(name__ic=message.text)
+        cnt = nb.dcim.sites.count(name__ic=message.text)
+    if cnt == 1:
+        msg, key = iterate_devices(devices)
+        await message.answer(msg, reply_markup=key, parse_mode='HTML')
+    elif cnt is False:
+        for device in devices:
+            msg, key = iterate_devices(device)
+            # pprint(device.name)
+            await message.answer(msg, reply_markup=key, parse_mode='HTML')
+            time.sleep(0.5)
+    elif cnt > 1:
+        for site in sites:
+            devices = nb.dcim.devices.filter(site_id=site.id, role_id={2, 3, 4})
+            # pprint(site)
+            for device in devices:
+                msg, key = iterate_devices(device)
+                await message.answer(msg, reply_markup=key, parse_mode='HTML')
+                time.sleep(0.5)
     else:
         await message.answer("Ничего не найдено")

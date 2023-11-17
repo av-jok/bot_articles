@@ -1,13 +1,6 @@
-import logging
 from pprint import pprint
-
 import pynetbox
-import requests
 import urllib3
-from bs4 import BeautifulSoup
-
-# from pprint import pprint
-
 
 netbox_url = 'https://netbox.avantel.ru/'
 netbox_api = '7f50ada4a4a66d4b2385e4f8f59a069bc219089b'
@@ -62,3 +55,11 @@ nb.http_session.verify = False
 #     except pynetbox.RequestError:
 #         logging.exception(f"Failed to attach image")
 # pprint(dict(image_data))
+try:
+    switch = nb.dcim.devices.get(asset_tag='99999')
+except pynetbox.RequestError as e:
+    pprint(e.error)
+    switch = False
+
+if switch:
+    print(switch.id)
