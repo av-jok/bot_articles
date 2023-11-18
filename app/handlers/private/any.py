@@ -37,27 +37,27 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
         client.get(url)
         csrftoken = client.cookies['csrftoken']
         login_data = dict(
-                username=conf.netbox.netbox_login,
-                password=conf.netbox.netbox_pass,
-                csrfmiddlewaretoken=csrftoken,
-                next=f"/"
-            )
+            username=conf.netbox.netbox_login,
+            password=conf.netbox.netbox_pass,
+            csrfmiddlewaretoken=csrftoken,
+            next=f"/"
+        )
         r = client.post(f"{url}/login/", data=login_data, headers=dict(Referer=url))
 
         csrftoken = r.cookies['csrftoken']
         res = client.get(
-                f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
-                data={'csrftoken': csrftoken, 'csrfmiddlewaretoken': csrftoken},
-                headers=dict(Referer=url)
+            f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
+            data={'csrftoken': csrftoken, 'csrfmiddlewaretoken': csrftoken},
+            headers=dict(Referer=url)
         )
 
         csrftoken = res.cookies['csrftoken']
         res = client.post(
-                f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
-                files={'image': open(filename, 'rb')},
-                data={'name': '', 'csrfmiddlewaretoken': csrftoken},
-                headers=dict(Referer=url)
-            )
+            f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
+            files={'image': open(filename, 'rb')},
+            data={'name': '', 'csrfmiddlewaretoken': csrftoken},
+            headers=dict(Referer=url)
+        )
         return res.status_code
 
     if callback_data.get('action') == 'photo':
@@ -152,7 +152,8 @@ async def scan_message(message: types.Message):
             row = cursor.fetchone()
 
         if not row:
-            args = (asset_tag, filename, message.photo[-1].file_unique_id, message.photo[-1].file_id, message.reply_to_message.from_user.first_name)
+            args = (asset_tag, filename, message.photo[-1].file_unique_id, message.photo[-1].file_id,
+                    message.reply_to_message.from_user.first_name)
             insert_query = f"INSERT INTO `bot_photo` (`sid`, `name`, `tid`, `file_id`, `upload`) VALUES (%s, %s, %s, %s, %s);"
             query_insert(insert_query, args)
             is_exist = True
@@ -167,8 +168,11 @@ async def scan_message(message: types.Message):
         keyboard = types.InlineKeyboardMarkup(row_width=3)
         if device.id:
             keyboard.add(types.InlineKeyboardButton(text="Device", url=device.url))
-            keyboard.add(types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
-            keyboard.add(types.InlineKeyboardButton(text="Залить", callback_data=cb.new(action="upload", value=device.id, id=filename)))
+            keyboard.add(
+                types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
+            keyboard.add(types.InlineKeyboardButton(text="Залить",
+                                                    callback_data=cb.new(action="upload", value=device.id,
+                                                                         id=filename)))
 
         if is_exist:
             # if message.from_user.id != 252810436:
@@ -220,16 +224,18 @@ def iterate_devices(device):
 
 @dp.message_handler(filters.IDFilter(user_id=USERS))
 async def echo(message: types.Message):
-    if len(message.text) < 4:
+    if len(message.text) < 5:
         await message.answer("Запрос должен быть длиннее")
         return False
+    devices = ''
+    sites = ''
 
     if re.match('^\\d{5}$', message.text) or re.match('^0\\d{4}$', message.text):
         text = re.match('^\\d{5}$', message.text) or re.match('^0\\d{4}$', message.text)
         devices = nb.dcim.devices.get(asset_tag=text[0])
         cnt = nb.dcim.devices.count(asset_tag=text[0])
-    elif re.search("^[0-9a-zA-Z_\-]*$", message.text):
-        text = re.match('^[0-9a-zA-Z_\-]*$', message.text)
+    elif re.search("^[0-9a-zA-Z_-]*$", message.text):
+        text = re.match('^[0-9a-zA-Z_-]*$', message.text)
         devices = nb.dcim.devices.filter(name__ic=text[0], role_id={2, 3, 4})
         # cnt = nb.dcim.devices.count(name__ic=text[0], role_id={2, 3, 4})
         cnt = False
