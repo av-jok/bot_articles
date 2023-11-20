@@ -217,7 +217,7 @@ def iterate_devices(device):
         f"<b>Инв </b>: {device.asset_tag}\n"
         f"<b>Модель:</b> {device.device_type}\n"
         f"<b>IP:</b> {device.primary_ip}\n"
-        f"<b>NID:</b> {device.id}\n\n"
+        f"<b>NetboxID:</b> {device.id}\n\n"
         f"<b>Comment:</b>\n\n<pre>{device.comments}</pre>"
     )
 
