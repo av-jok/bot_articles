@@ -1,9 +1,10 @@
+import re
+import os
 import time
 import pymysql
 import pynetbox
 import requests
-import re
-import os
+import ipaddress
 from typing import Any
 from loguru import logger
 from pprint import pprint
@@ -79,7 +80,6 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
 
         if cnt_nb > 0 or cnt_db > 0:
             logger.debug(f"Внутри Фото: в НБ - {cnt_nb}, в БД - {str(cnt_db)}")
-
             if cnt_nb > 0:
                 imgs = nb.extras.image_attachments.filter(object_id=callback_data.get('value'))
                 for item in imgs:
@@ -102,6 +102,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
             await types.ChatActions.upload_photo()
             await callback.message.reply_media_group(media=media)
         else:
+            logger.debug(f"Фото не найдено")
             await callback.answer(text="Фотографии не найдены", show_alert=True)
         return True
 
