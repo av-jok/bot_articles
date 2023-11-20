@@ -103,6 +103,8 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
             await callback.message.reply_media_group(media=media)
         else:
             logger.debug(f"Фото не найдено")
+            await bot.send_message(callback.from_user.id, f"Фотографии не найдены",
+                                   reply_to_message_id=callback.message.message_id)
             await callback.answer(text="Фотографии не найдены", show_alert=True)
         return True
 
