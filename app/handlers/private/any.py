@@ -30,9 +30,11 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     device = nb.dcim.devices.get(id=callback_data.get('value'))
 
     if callback_data.get('action') == 'upload':
-        await bot.send_message(callback.from_user.id, f"{post}")
+
         url = conf.netbox.netbox_url
         filename = conf.tg_bot.upload_dir_photo + callback_data.get('id')
+
+        await bot.send_message(callback.from_user.id, f"{url}\n{filename}")
 
         client = requests.session()
 
@@ -61,6 +63,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
             headers=dict(Referer=url)
         )
         logger.debug(f"Код ответа - {res.status_code}")
+        await bot.send_message(callback.from_user.id, f"Код ответа - {res.status_code}")
         return True
 
     if callback_data.get('action') == 'photo':
@@ -181,7 +184,7 @@ async def scan_message(message: types.Message):
 
         keyboard = InlineKeyboardMarkup(row_width=3)
         if device.id:
-            keyboard.add(InlineKeyboardButton(text="Device", url=device.url))
+            keyboard.add(InlineKeyboardButton(text="Device", url=device.url.replace('/api/', '/')))
             keyboard.add(InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
             keyboard.add(InlineKeyboardButton(text="Залить", callback_data=cb.new(action="upload",
                                                                                   value=device.id,
