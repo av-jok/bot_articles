@@ -77,6 +77,8 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
         logger.debug(f"Фото: в НБ - {cnt_nb}, в БД - {str(cnt_db)}")
 
         if cnt_nb > 0 or cnt_db > 0:
+            logger.debug(f"Внутри Фото: в НБ - {cnt_nb}, в БД - {str(cnt_db)}")
+
             if cnt_nb > 0:
                 imgs = nb.extras.image_attachments.filter(object_id=callback_data.get('value'))
                 for item in imgs:
