@@ -18,7 +18,7 @@ cb = CallbackData("post", "action", "value", "id")
 
 
 @dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
-async def callbacks(callback: types.CallbackQuery, callback_data: dict):
+async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     post = dict()
     post['action'] = callback_data.get('action')
     post['value'] = callback_data.get('value')
@@ -58,7 +58,8 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
             data={'name': '', 'csrfmiddlewaretoken': csrftoken},
             headers=dict(Referer=url)
         )
-        return res.status_code
+        logger.debug(f"Код ответа - {res.status_code}")
+        return True
 
     if callback_data.get('action') == 'photo':
         db = pymysql.connect(host=conf.db.host,
@@ -105,7 +106,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict):
         return True
 
     if callback_data.get('action') == 'ping':
-        hostname = device.primary_ip
+        hostname = str(device.primary_ip)
         host = "is down!"
         response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
         if response == 0:
