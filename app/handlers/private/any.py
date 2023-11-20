@@ -111,8 +111,11 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
 
     if callback_data.get('action') == 'ping':
         host = "is down!"
-        hostname = ipaddress.ip_interface(device.primary_ip)
-        hostname = str(hostname.ip)
+        try:
+            hostname = ipaddress.ip_interface('192.168.82.1/22')
+            hostname = str(hostname.ip)
+        except ValueError as e:
+            hostname = None
 
         response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
         if response == 0:
@@ -209,8 +212,11 @@ def iterate_devices(device):
         case _:
             status = device.status.value
 
-    hostname = ipaddress.ip_interface(device.primary_ip)
-    hostname = str(hostname.ip)
+    try:
+        hostname = ipaddress.ip_interface('192.168.82.1/22')
+        hostname = str(hostname.ip)
+    except ValueError as e:
+        hostname = None
 
     msg = (
         f"<b>Адрес:</b> {device.site}\n"
