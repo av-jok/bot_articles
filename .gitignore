@@ -82,3 +82,4 @@ venv.bak/
 # data
 pgdata/
 
+/mysqls_db/

@@ -18,8 +18,47 @@ services:
       options:
         max-size: "200k"
         max-file: "10"
+    depends_on:
+      - mysqls_db
     networks:
       - tg_bot
+
+  mysqls_db:
+    image: mysql:8.0
+    container_name: mysqls_db
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    build:
+      context: mysql
+      dockerfile: Dockerfile
+    env_file:
+      - ".env"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      character-set-server: utf8mb4
+      collation-server: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysqls_db:/var/lib/mysql
+      - ./mysql/dump:/docker-entrypoint-initdb.d
+    networks:
+      - tg_bot
+
+#   redis_cache:
+#     image: redis:6.2-alpine
+#     container_name: redis_bot
+#     restart: always
+#     command: redis-server --port $REDIS_PORT --save 20 1 --loglevel warning --requirepass $REDIS_PASSWORD
+#     env_file:
+#       - ".env"
+#     volumes:
+#       - ./cache:/data
+#     networks:
+#       - tg_bot
 
 networks:
   tg_bot:
