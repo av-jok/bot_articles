@@ -80,10 +80,9 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
 
         media = types.MediaGroup()
         cnt_nb = nb.extras.image_attachments.count(object_id=callback_data.get('value'))
-        logger.debug(f"Фото: в НБ - {cnt_nb}, в БД - {str(cnt_db)}")
 
         if cnt_nb > 0 or cnt_db > 0:
-            logger.debug(f"Внутри Фото: в НБ - {cnt_nb}, в БД - {str(cnt_db)}")
+            logger.debug(f"Фото: в НБ - {cnt_nb}, в БД - {str(cnt_db)}")
             if cnt_nb > 0:
                 imgs = nb.extras.image_attachments.filter(object_id=callback_data.get('value'))
                 for item in imgs:
@@ -124,6 +123,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
         if response == 0:
             host = "is up!"
 
+        logger.debug(f"Пинг {hostname} - {host}")
         await bot.send_message(callback.from_user.id, f"Switch: {hostname} {host}",
                                reply_to_message_id=callback.message.message_id)
         return True
@@ -228,7 +228,8 @@ def iterate_devices(device):
         f"<b>Инв </b>: {device.asset_tag}\n"
         f"<b>Модель:</b> {device.device_type}\n"
         f"<b>IP:</b> {hostname}\n"
-        f"<b>NetboxID:</b> {device.id}\n\n"
+        f"<b>NetboxID:</b> {device.id}\n"
+        f"<b>Контакты:</b> {device.custom_fields['Contact']}\n"
         f"<b>Comment:</b>\n\n<pre>{device.comments}</pre>"
     )
 
