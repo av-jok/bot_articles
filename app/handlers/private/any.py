@@ -106,7 +106,12 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
         return True
 
     if callback_data.get('action') == 'ping':
-        hostname = str(device.primary_ip)
+        rep = {"/22": "", "/24": "", "/25": "", "/27": "", "/28": "", "/30": "", "/32": ""}
+
+        rep = dict((re.escape(k), v) for k, v in rep.items())
+        pattern = re.compile("|".join(rep.keys()))
+        hostname = pattern.sub(lambda m: rep[re.escape(m.group(0))], str(device.primary_ip))
+
         host = "is down!"
         response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
         if response == 0:
