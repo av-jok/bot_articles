@@ -1,0 +1,7 @@
+venv/
+.idea/
+cache/
+alembic
+pgdata
+README.MD
+test/
