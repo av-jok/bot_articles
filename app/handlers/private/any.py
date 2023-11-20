@@ -11,6 +11,7 @@ from pprint import pprint
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from app.loader import dp, bot, query_insert
 from app.config import USERS, HEADERS, conf, nb
 from requests import request
@@ -175,14 +176,13 @@ async def scan_message(message: types.Message):
         file_path = (await bot.get_file(image_id)).file_path
         await bot.download_file(file_path, destination)
 
-        keyboard = types.InlineKeyboardMarkup(row_width=3)
+        keyboard = InlineKeyboardMarkup(row_width=3)
         if device.id:
-            keyboard.add(types.InlineKeyboardButton(text="Device", url=device.url))
-            keyboard.add(
-                types.InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
-            keyboard.add(types.InlineKeyboardButton(text="Залить",
-                                                    callback_data=cb.new(action="upload", value=device.id,
-                                                                         id=filename)))
+            keyboard.add(InlineKeyboardButton(text="Device", url=device.url))
+            keyboard.add(InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
+            keyboard.add(InlineKeyboardButton(text="Залить", callback_data=cb.new(action="upload",
+                                                                                  value=device.id,
+                                                                                  id=filename)))
 
         if is_exist:
             if message.from_user.id != 252810436:
@@ -209,13 +209,16 @@ def iterate_devices(device):
         case _:
             status = device.status.value
 
+    hostname = ipaddress.ip_interface(device.primary_ip)
+    hostname = str(hostname.ip)
+
     msg = (
         f"<b>Адрес:</b> {device.site}\n"
         f"<b>Стойка:</b> {device.rack}\n\n"
         f"<b>Имя:</b> {device.name} {status}\n"
         f"<b>Инв </b>: {device.asset_tag}\n"
         f"<b>Модель:</b> {device.device_type}\n"
-        f"<b>IP:</b> {device.primary_ip}\n"
+        f"<b>IP:</b> {hostname}\n"
         f"<b>NetboxID:</b> {device.id}\n\n"
         f"<b>Comment:</b>\n\n<pre>{device.comments}</pre>"
     )
