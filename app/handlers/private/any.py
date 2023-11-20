@@ -156,6 +156,8 @@ async def scan_message(message: types.Message):
         logger.debug(f"!!!!!!! switch = {device}")
         if device:
             text_out += f"Netbox - {device.id}"
+        else:
+            text_out += f"Netbox - нет"
 
         select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{asset_tag}' LIMIT 1"
         with db.cursor() as cursor:
