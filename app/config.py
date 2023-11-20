@@ -32,6 +32,7 @@ class RediConf:
     host: str
     password: str
     database: str
+    port: str
 
 
 @dataclass
@@ -87,7 +88,8 @@ def load_config():
         redis=RediConf(
             host=env.str('REDIS_HOST'),
             password=env.str('REDIS_PASSWORD'),
-            database=env.str('REDIS_DATABASE')
+            database=env.str('REDIS_DATABASE'),
+            port=env.str('REDIS_PORT', 6379)
         ),
         netbox=NetBox(
             netbox_api=env.str('NETBOX_API'),

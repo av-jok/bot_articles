@@ -20,6 +20,7 @@ services:
         max-file: "10"
     depends_on:
       - mysqls_db
+      - redis_cache
     networks:
       - tg_bot
 
@@ -48,17 +49,17 @@ services:
     networks:
       - tg_bot
 
-#   redis_cache:
-#     image: redis:6.2-alpine
-#     container_name: redis_bot
-#     restart: always
-#     command: redis-server --port $REDIS_PORT --save 20 1 --loglevel warning --requirepass $REDIS_PASSWORD
-#     env_file:
-#       - ".env"
-#     volumes:
-#       - ./cache:/data
-#     networks:
-#       - tg_bot
+  redis_cache:
+    image: redis:6.2-alpine
+    container_name: redis_bot
+    restart: always
+    command: redis-server --port $REDIS_PORT --save 20 1 --loglevel warning --requirepass $REDIS_PASSWORD
+    env_file:
+      - ".env"
+    volumes:
+      - ./cache:/data
+    networks:
+      - tg_bot
 
 networks:
   tg_bot:
