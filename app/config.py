@@ -102,7 +102,7 @@ def load_config():
         ),
         misc=Miscellaneous(
             users=USERS,
-            headers={'Content-Type': 'application/json', 'Authorization': f'Token {conf.netbox.netbox_api}'}
+            headers={'Content-Type': 'application/json', 'Authorization': f"Token {env.str('NETBOX_API')}"}
         )
     )
 
@@ -111,8 +111,3 @@ conf = load_config()
 urllib3.disable_warnings()
 nb = pynetbox.api(url=conf.netbox.netbox_url, token=conf.netbox.netbox_api)
 nb.http_session.verify = False
-
-# HEADERS = {
-#     'Content-Type': 'application/json',
-#     'Authorization': f'Token {conf.netbox.netbox_api}'
-# }
