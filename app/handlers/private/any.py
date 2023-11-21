@@ -30,15 +30,20 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     device = nb.dcim.devices.get(id=callback_data.get('value'))
 
     if callback_data.get('action') == 'upload':
+        logger.debug(f"Upload - 1")
+
         url = conf.netbox.netbox_url
         filename = conf.tg_bot.upload_dir_photo + callback_data.get('id')
 
         await bot.send_message(callback.from_user.id, f"{url}\n{filename}")
+        logger.debug(f"Upload - {url} - {filename}")
 
         client = requests.session()
 
         client.get(url)
         csrftoken = client.cookies['csrftoken']
+        logger.debug(f"Upload - {csrftoken}")
+
         login_data = dict(
             username=conf.netbox.netbox_login,
             password=conf.netbox.netbox_pass,
@@ -48,6 +53,8 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
         r = client.post(f"{url}/login/", data=login_data, headers=dict(Referer=url))
 
         csrftoken = r.cookies['csrftoken']
+        logger.debug(f"Upload - {csrftoken}")
+
         res = client.get(
             f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
             data={'csrftoken': csrftoken, 'csrfmiddlewaretoken': csrftoken},
@@ -55,6 +62,8 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
         )
 
         csrftoken = res.cookies['csrftoken']
+        logger.debug(f"Upload - {csrftoken}")
+
         res = client.post(
             f"{url}/extras/image-attachments/add/?content_type=19&object_id={device.id}",
             files={'image': open(filename, 'rb')},
