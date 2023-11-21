@@ -9,7 +9,8 @@ bot = Bot(
     parse_mode=types.ParseMode.HTML,
 )
 
-storage = RedisStorage2(host=conf.redis.host, db=conf.redis.database, password=conf.redis.password) if conf.tg_bot.use_redis else MemoryStorage()
+storage = RedisStorage2(host=conf.redis.host, db=conf.redis.database,
+                        password=conf.redis.password) if conf.tg_bot.use_redis else MemoryStorage()
 
 dp = Dispatcher(
     bot=bot,
@@ -43,6 +44,7 @@ def query_insert(query, args):
         print(ex)
 
     return is_true
+
 
 # bot.delete_webhook(drop_pending_updates=True)
 

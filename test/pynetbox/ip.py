@@ -1,7 +1,6 @@
 import pynetbox
 import urllib3
 
-
 # General vars
 netbox_url = 'https://netbox.jok.su/'
 netbox_api = '55d1fce82f73c8dd7ec5b188f0eddfd31319a2fb'

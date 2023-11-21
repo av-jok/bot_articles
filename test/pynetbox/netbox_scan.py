@@ -11,7 +11,6 @@ import socket
 netbox_url = 'https://netbox.avantel.ru/'
 netbox_api = '7f50ada4a4a66d4b2385e4f8f59a069bc219089b'
 
-
 # Disable SSL and SSL Warnings
 urllib3.disable_warnings()
 
@@ -62,7 +61,7 @@ def netb_ipam_update(netbox_ip_id, netbox_ip, prefix, nmap_host_state):
     if (nmap_host_state == 'up') and (netbox_ip_id == 0):
         netbox_add_ip(netbox_ip, prefix)
     # elif (nmap_host_state == 'down') and (netbox_ip_id != 0):
-        # netbox_remove_ip(netbox_ip_id)
+    # netbox_remove_ip(netbox_ip_id)
     return True
 
 

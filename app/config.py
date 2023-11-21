@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from typing import Any
 from environs import Env
 import pynetbox
 import urllib3
@@ -57,6 +58,8 @@ class NetBox:
 @dataclass
 class Miscellaneous:
     other_params: str = None
+    users: set[int | Any] = None
+    headers: dict = None
 
 
 @dataclass
@@ -97,7 +100,10 @@ def load_config():
             netbox_login=env.str('NETBOX_LOGIN'),
             netbox_pass=env.str('NETBOX_PASS')
         ),
-        misc=Miscellaneous()
+        misc=Miscellaneous(
+            users=USERS,
+            headers={'Content-Type': 'application/json', 'Authorization': f'Token {conf.netbox.netbox_api}'}
+        )
     )
 
 
@@ -106,7 +112,7 @@ urllib3.disable_warnings()
 nb = pynetbox.api(url=conf.netbox.netbox_url, token=conf.netbox.netbox_api)
 nb.http_session.verify = False
 
-HEADERS = {
-    'Content-Type': 'application/json',
-    'Authorization': f'Token {conf.netbox.netbox_api}'
-}
+# HEADERS = {
+#     'Content-Type': 'application/json',
+#     'Authorization': f'Token {conf.netbox.netbox_api}'
+# }

@@ -8,4 +8,5 @@ async def setup_default_commands(dp):
         [types.BotCommand(name, description) for name, description in commands]
     )
 
+
 logger.info('Standard commands are successfully configured')

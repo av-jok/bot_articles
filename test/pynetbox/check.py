@@ -11,7 +11,6 @@ URL = 'https://netbox.avantel.ru/'
 API_TOKEN = '7f50ada4a4a66d4b2385e4f8f59a069bc219089b'
 nb = pynetbox.api(url=URL, token=API_TOKEN, threading=True)
 
-
 entries = nb.extras.journal_entries.filter(assigned_object_type="dcim.rack", assigned_object_id=481)
 
 for entry in entries:

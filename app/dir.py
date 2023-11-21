@@ -92,7 +92,6 @@ for i in results:
     #     cursor.execute(sql, args)
     # db.commit()
 
-
 results = diff_array_with_dir(conf.tg_bot.upload_dir_photo, rows)
 # with db.cursor() as cursor:
 #

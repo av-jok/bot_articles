@@ -19,5 +19,6 @@ async def start(message: Message):
     )
     await message.answer("text", reply_markup=markup)
 
+
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=False)

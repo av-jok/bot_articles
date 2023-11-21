@@ -13,13 +13,13 @@ from aiogram.dispatcher import filters
 from aiogram import types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from app.loader import dp, bot, query_insert
-from app.config import USERS, HEADERS, conf, nb
+from app.config import conf, nb
 from requests import request
 
 cb = CallbackData("post", "action", "value", "id")
 
 
-@dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=USERS))
+@dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=conf.misc.users))
 async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     post = dict()
     post['action'] = callback_data.get('action')
@@ -30,7 +30,6 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     device = nb.dcim.devices.get(id=callback_data.get('value'))
 
     if callback_data.get('action') == 'upload':
-
         url = conf.netbox.netbox_url
         filename = conf.tg_bot.upload_dir_photo + callback_data.get('id')
 
@@ -86,7 +85,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
             if cnt_nb > 0:
                 imgs = nb.extras.image_attachments.filter(object_id=callback_data.get('value'))
                 for item in imgs:
-                    img_data = request("GET", item.image, headers=HEADERS, data='').content
+                    img_data = request("GET", item.image, headers=conf.misc.headers, data='').content
                     filename = conf.tg_bot.upload_dir_data + str(item.object_id) + "_" + str(item.id) + ".jpg"
                     with open(filename, 'wb') as photo:
                         photo.write(img_data)
@@ -116,7 +115,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
         try:
             hostname = ipaddress.ip_interface('192.168.82.1/22')
             hostname = str(hostname.ip)
-        except ValueError as e:
+        except ValueError:
             hostname = None
 
         response = os.system("ping -c 1 -W 1 " + hostname + "> /dev/null")
@@ -131,7 +130,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     await bot.send_message(callback.from_user.id, f"value: {post['value']}\naction: {post['action']}\n\n{post}")
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), content_types=types.ContentType.PHOTO)
+@dp.message_handler(filters.IDFilter(user_id=conf.misc.users), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
     device: Any
     db = pymysql.connect(host=conf.db.host,
@@ -185,14 +184,15 @@ async def scan_message(message: types.Message):
         keyboard = InlineKeyboardMarkup(row_width=3)
         if device.id:
             keyboard.add(InlineKeyboardButton(text="Device", url=device.url.replace('/api/', '/')))
-            keyboard.add(InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
+            keyboard.add(
+                InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
             keyboard.add(InlineKeyboardButton(text="Залить", callback_data=cb.new(action="upload",
                                                                                   value=device.id,
                                                                                   id=filename)))
 
         if is_exist:
-            if message.from_user.id != 252810436:
-                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out, reply_markup=keyboard)
+            # if message.from_user.id != 252810436:
+            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out, reply_markup=keyboard)
             await bot.send_message(message.from_user.id, f"Принято {filename}",
                                    reply_to_message_id=message.reply_to_message)
         else:
@@ -218,7 +218,7 @@ def iterate_devices(device):
     try:
         hostname = ipaddress.ip_interface('192.168.82.1/22')
         hostname = str(hostname.ip)
-    except ValueError as e:
+    except ValueError:
         hostname = None
 
     msg = (
@@ -245,7 +245,7 @@ def iterate_devices(device):
     return msg, keyboard
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS))
+@dp.message_handler(filters.IDFilter(user_id=conf.misc.users))
 async def echo(message: types.Message):
     if len(message.text) < 5:
         await message.answer("Запрос должен быть длиннее")

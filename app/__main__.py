@@ -19,6 +19,7 @@ async def on_sthutdown(dispatcher: Dispatcher):
     await utils.notify_admins("Bot shutdown", conf.tg_bot.admin_ids)
     return True
 
+
 if __name__ == '__main__':
     # utils.setup_logger("INFO", ["sqlalchemy.engine", "aiogram.bot.api", "aiogram.contrib.middlewares.logging"])
     # utils.setup_logger("DEBUG", ["sqlalchemy.engine", "aiogram.bot.api"])

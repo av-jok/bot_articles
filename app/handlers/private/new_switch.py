@@ -135,7 +135,6 @@ async def send_data(call: types.CallbackQuery, callback_data: dict):
     await call.answer()
 
     if callback_data.get('value') == 'config':
-
         return await bot.send_message(call.from_user.id, f"Здесь будет конфиг")
 
     await bot.send_message(call.from_user.id, f"value: {post['value']}\naction: {post['action']}")

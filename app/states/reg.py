@@ -5,5 +5,3 @@ class UserState(StatesGroup):
     name = State()
     email = State()
     age = State()
-
-

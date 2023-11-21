@@ -18,7 +18,6 @@ dev_type = nb.dcim.device_types.get(slug="template")
 dev_role = nb.dcim.device_roles.get(slug="access-switch")
 dev_site = nb.dcim.sites.get(slug="unilink")
 
-
 with open('zbx_export_hosts.json') as file:
     zbx_dict = json.load(file)
 
@@ -78,7 +77,10 @@ for host in zbx_dict['zabbix_export']['hosts']:
 
         new_dev.save()
         # Display summary, just to see if objects were really created
-        logging.info("Device '{dev}' created with interface '{intf}', which has IP {ipadd}.".format(dev=new_dev["name"], intf=new_intf["name"], ipadd=new_ip["address"]))
+        logging.info("Device '{dev}' created with interface '{intf}', which has IP {ipadd}.".format(dev=new_dev["name"],
+                                                                                                    intf=new_intf[
+                                                                                                        "name"],
+                                                                                                    ipadd=new_ip[
+                                                                                                        "address"]))
     else:
         logging.debug(f"{host['host'].lower()} существует, пропускаем")
-
