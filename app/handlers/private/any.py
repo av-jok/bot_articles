@@ -122,7 +122,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     if callback_data.get('action') == 'ping':
         host = "is down!"
         try:
-            hostname = ipaddress.ip_interface('192.168.82.1/22')
+            hostname = ipaddress.ip_interface(device.primary_ip4)
             hostname = str(hostname.ip)
         except ValueError:
             hostname = None
