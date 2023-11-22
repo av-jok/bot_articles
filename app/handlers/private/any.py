@@ -225,7 +225,7 @@ def iterate_devices(device):
             status = device.status.value
 
     try:
-        hostname = ipaddress.ip_interface('192.168.82.1/22')
+        hostname = ipaddress.ip_interface(device.primary_ip4)
         hostname = str(hostname.ip)
     except ValueError:
         hostname = None
