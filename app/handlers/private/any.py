@@ -191,7 +191,7 @@ async def scan_message(message: types.Message):
         await bot.download_file(file_path, destination)
 
         keyboard = InlineKeyboardMarkup(row_width=3)
-        if device.id:
+        if device:
             keyboard.add(InlineKeyboardButton(text="Device", url=device.url.replace('/api/', '/')))
             keyboard.add(
                 InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
@@ -200,8 +200,8 @@ async def scan_message(message: types.Message):
                                                                                   id=filename)))
 
         if is_exist:
-            # if message.from_user.id != 252810436:
-            await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out, reply_markup=keyboard)
+            if message.from_user.id != 252810436:
+                await bot.send_photo('252810436', message.photo[-1]["file_id"], caption=text_out, reply_markup=keyboard)
             await bot.send_message(message.from_user.id, f"Принято {filename}",
                                    reply_to_message_id=message.reply_to_message)
         else:
