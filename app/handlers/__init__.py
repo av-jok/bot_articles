@@ -9,4 +9,4 @@ from .private import start
 
 from .private import any
 
-logger.info("Handlers are successfully configured")
+# logger.info("Handlers are successfully configured")

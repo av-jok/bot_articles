@@ -42,7 +42,7 @@ services:
       character-set-server: utf8mb4
       collation-server: utf8mb4_unicode_ci
     ports:
-      - "3306:3306"
+      - "13306:3306"
     volumes:
       - ./mysqls_db:/var/lib/mysql
       - ./mysql/dump:/docker-entrypoint-initdb.d

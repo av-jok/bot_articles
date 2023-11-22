@@ -23,6 +23,7 @@ USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 101686
 @dataclass
 class DbConfig:
     host: str
+    port: str
     password: str
     user: str
     database: str
@@ -84,6 +85,7 @@ def load_config():
         ),
         db=DbConfig(
             host=env.str('DB_HOST'),
+            port=env.str('DB_PORT'),
             password=env.str('DB_PASS'),
             user=env.str('DB_USER'),
             database=env.str('DB_NAME')

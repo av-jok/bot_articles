@@ -194,14 +194,14 @@ async def scan_message(message: types.Message):
         file_path = (await bot.get_file(image_id)).file_path
         await bot.download_file(file_path, destination)
 
-        keyboard = InlineKeyboardMarkup(row_width=3)
         if device:
-            keyboard.add(InlineKeyboardButton(text="Device", url=device.url.replace('/api/', '/')))
-            keyboard.add(
-                InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')))
-            keyboard.add(InlineKeyboardButton(text="Залить", callback_data=cb.new(action="upload",
-                                                                                  value=device.id,
-                                                                                  id=filename)))
+            buttons = [
+                InlineKeyboardButton(text="Device", url=device.url.replace('/api/', '/')),
+                InlineKeyboardButton(text="Фото", callback_data=cb.new(action="photo", value=device.id, id='')),
+                InlineKeyboardButton(text="Залить", callback_data=cb.new(action="upload", value=device.id, id=filename))
+            ]
+            keyboard = types.InlineKeyboardMarkup(row_width=2)
+            keyboard.add(*buttons)
 
         if is_exist:
             if message.from_user.id != 252810436:
@@ -215,7 +215,7 @@ async def scan_message(message: types.Message):
     db.close()
 
 
-def iterate_devices(device):
+def item_devices(device):
     match device.status.value:
         case 'active':
             status = '🟢'
@@ -279,11 +279,11 @@ async def echo(message: types.Message):
         sites = nb.dcim.sites.filter(name__ic=message.text)
         cnt = nb.dcim.sites.count(name__ic=message.text)
     if cnt == 1:
-        msg, key = iterate_devices(devices)
+        msg, key = item_devices(devices)
         await message.answer(msg, reply_markup=key, parse_mode='HTML')
     elif cnt is False:
         for device in devices:
-            msg, key = iterate_devices(device)
+            msg, key = item_devices(device)
             # pprint(device.name)
             await message.answer(msg, reply_markup=key, parse_mode='HTML')
             time.sleep(0.5)
@@ -292,7 +292,7 @@ async def echo(message: types.Message):
             devices = nb.dcim.devices.filter(site_id=site.id, role_id={2, 3, 4})
             # pprint(site)
             for device in devices:
-                msg, key = iterate_devices(device)
+                msg, key = item_devices(device)
                 await message.answer(msg, reply_markup=key, parse_mode='HTML')
                 time.sleep(0.5)
     else:
