@@ -22,10 +22,10 @@ class InterceptHandler(logging.Handler):
 
 
 def setup_logger(level: Union[str, int] = "DEBUG", ignored: List[str] = ""):
-    logging.basicConfig(handlers=[InterceptHandler()], level=logging.INFO)
+    logging.basicConfig(handlers=[InterceptHandler()], level=logging.DEBUG)
     # logger.add("out.log", backtrace=True, diagnose=True, level='INFO', retention="1 day")
 
-    logger.add("Xpyngel_{time:DD_MM_YYYY}.log", backtrace=True, diagnose=True, level="INFO", rotation="1 MB")
+    logger.add("Xpyngel_{time:DD_MM_YYYY}.log", backtrace=True, diagnose=True, level="DEBUG", rotation="1 MB")
 
     for ignore in ignored:
         logger.disable(ignore)
