@@ -172,14 +172,18 @@ async def scan_message(message: types.Message):
             text_out += f"Netbox - нет"
 
         select_all_rows = f"SELECT * FROM `bot_photo` WHERE tid='{message.photo[-1].file_unique_id}' AND sid='{asset_tag}' LIMIT 1"
+        pprint(select_all_rows)
         with db.cursor() as cursor:
             cursor.execute(select_all_rows)
             row = cursor.fetchone()
+            pprint(row)
 
         if not row:
             args = (asset_tag, filename, message.photo[-1].file_unique_id, message.photo[-1].file_id,
                     message.reply_to_message.from_user.first_name)
             insert_query = f"INSERT INTO `bot_photo` (`sid`, `name`, `tid`, `file_id`, `upload`) VALUES (%s, %s, %s, %s, %s);"
+            pprint(insert_query)
+            pprint(args)
             query_insert(insert_query, args)
             is_exist = True
         logger.debug(f"is_exist = {is_exist}")
