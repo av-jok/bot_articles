@@ -11,7 +11,7 @@ from app.states.state import PhotoDownload
 
 
 # обработчик выхода из машины состояний
-@dp.message_handler(filters.IDFilter(user_id=USERS), state='*', commands='cancel')
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state='*', commands='cancel')
 async def cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
@@ -20,20 +20,20 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.answer('отменена!')
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), commands="file")
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), commands="file")
 async def command_reg_handler(message: types.Message):
     await message.answer("Введите инвентарный №")
     await PhotoDownload.id.set()
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), state=PhotoDownload.id)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state=PhotoDownload.id)
 async def get_street(message: types.Message, state: FSMContext):
     await state.update_data(id=message.text)
     await message.answer("Отлично! Теперь введите адрес.")
     await PhotoDownload.address.set()  # либо же UserState.adress.set()
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), state=PhotoDownload.address)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state=PhotoDownload.address)
 async def get_photo(message: types.Message, state: FSMContext):
     await state.update_data(address=message.text)
     await message.answer("Отлично! Теперь кидай фото.")
@@ -52,7 +52,8 @@ async def get_photo(message: types.Message, state: FSMContext):
 
 
 # @rate_limit(5)
-@dp.message_handler(filters.IDFilter(user_id=USERS), state=PhotoDownload.photo, content_types=types.ContentType.PHOTO)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state=PhotoDownload.photo,
+                    content_types=types.ContentType.PHOTO)
 async def handle_albums(message: types.Message, state: FSMContext):
     """This handler will receive a complete album of any type."""
     await state.update_data(photo=message.photo[-1].file_unique_id)

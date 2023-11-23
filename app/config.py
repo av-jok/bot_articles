@@ -1,9 +1,10 @@
 import os
-from dataclasses import dataclass
-from typing import Any
-from environs import Env
-import pynetbox
 import urllib3
+import pynetbox
+from environs import Env
+from dataclasses import dataclass
+
+urllib3.disable_warnings()
 
 # List of commands
 commands = (
@@ -11,13 +12,6 @@ commands = (
     ("help", "Get the command list"),
     ("id", "Get the command list"),
 )
-
-env = Env()
-env.read_env()
-
-USERS = {52384439, 539181195, 345467127, 252810436, 347748319, 494729634, 1016868504, 361955359, 1292364914, 449155597,
-         233703468, 842525963, 564569131, 1034083048, 224825221, 1369644834, 150862960, 1134721808, 1285798322,
-         700520296, 700520296}
 
 
 @dataclass
@@ -41,6 +35,7 @@ class RediConf:
 class TgBot:
     token: str
     admin_ids: list[int]
+    user_ids: list[int]
     use_redis: bool
     skip_updates: bool
     upload_dir_photo: str
@@ -58,8 +53,6 @@ class NetBox:
 
 @dataclass
 class Miscellaneous:
-    other_params: str = None
-    users: set[int | Any] = None
     headers: dict = None
 
 
@@ -77,6 +70,7 @@ def load_config():
         tg_bot=TgBot(
             token=env.str("BOT_TOKEN"),
             admin_ids=list(map(int, env.list("SUPERUSER_IDS"))),
+            user_ids=list(map(int, env.list("USERS_IDS"))),
             use_redis=env.bool("USE_REDIS"),
             skip_updates=env.bool("SKIP_UPDATES"),
             upload_dir_photo=os.path.dirname(os.path.realpath(__file__)) + "/_Photos/",
@@ -103,13 +97,13 @@ def load_config():
             netbox_pass=env.str('NETBOX_PASS')
         ),
         misc=Miscellaneous(
-            users=USERS,
             headers={'Content-Type': 'application/json', 'Authorization': f"Token {env.str('NETBOX_API')}"}
         )
     )
 
 
+env = Env()
+env.read_env()
 conf = load_config()
-urllib3.disable_warnings()
 nb = pynetbox.api(url=conf.netbox.netbox_url, token=conf.netbox.netbox_api)
 nb.http_session.verify = False

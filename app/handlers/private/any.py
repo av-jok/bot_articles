@@ -11,7 +11,7 @@ from pprint import pprint
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher import filters
 from aiogram import types
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import InlineKeyboardButton
 from app.loader import dp, bot, query_insert
 from app.config import conf, nb
 from requests import request
@@ -19,7 +19,7 @@ from requests import request
 cb = CallbackData("post", "action", "value", "id")
 
 
-@dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=conf.misc.users))
+@dp.callback_query_handler(cb.filter(), filters.IDFilter(user_id=conf.tg_bot.user_ids))
 async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     post = dict()
     post['action'] = callback_data.get('action')
@@ -139,7 +139,7 @@ async def callbacks(callback: types.CallbackQuery, callback_data: dict) -> bool:
     await bot.send_message(callback.from_user.id, f"value: {post['value']}\naction: {post['action']}\n\n{post}")
 
 
-@dp.message_handler(filters.IDFilter(user_id=conf.misc.users), content_types=types.ContentType.PHOTO)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), content_types=types.ContentType.PHOTO)
 async def scan_message(message: types.Message):
     device: Any
     db = pymysql.connect(host=conf.db.host,
@@ -202,6 +202,8 @@ async def scan_message(message: types.Message):
             ]
             keyboard = types.InlineKeyboardMarkup(row_width=2)
             keyboard.add(*buttons)
+        else:
+            keyboard = None
 
         if is_exist:
             if message.from_user.id != 252810436:
@@ -258,7 +260,7 @@ def item_devices(device):
     return msg, keyboard
 
 
-@dp.message_handler(filters.IDFilter(user_id=conf.misc.users))
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids))
 async def echo(message: types.Message):
     if len(message.text) < 5:
         await message.answer("Запрос должен быть длиннее")

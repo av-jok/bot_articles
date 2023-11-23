@@ -7,7 +7,7 @@ from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher.filters.state import StatesGroup, State
 
 from app.loader import dp, bot
-from app.config import USERS, conf
+from app.config import conf
 
 
 # from typing import Union
@@ -33,7 +33,7 @@ cb = CallbackData("switch", "action", "value")
 # keyboard.add(*buttons)
 
 # обработчик выхода из машины состояний
-@dp.message_handler(filters.IDFilter(user_id=USERS), state='*', commands='cancel')
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state='*', commands='cancel')
 async def cancel_handler(message: types.Message, state: FSMContext):
     current_state = await state.get_state()
     if current_state is None:
@@ -42,28 +42,28 @@ async def cancel_handler(message: types.Message, state: FSMContext):
     await message.answer('отмена!')
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), commands="new_switch")
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), commands="new_switch")
 async def command_reg_handler(message: types.Message):
     await message.answer("!!! Добавляем новый свитч !!! \nДля отмены ввести /cancel")
     await message.answer("Введите инвентарный №")
     await NewSwitch.asset_tag.set()
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), state=NewSwitch.asset_tag)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state=NewSwitch.asset_tag)
 async def get_street(message: types.Message, state: FSMContext):
     await state.update_data(asset_tag=message.text)
     await message.answer("Введите SN.")
     await NewSwitch.serial.set()  # либо же UserState.adress.set()
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), state=NewSwitch.serial)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state=NewSwitch.serial)
 async def get_photo(message: types.Message, state: FSMContext):
     await state.update_data(address=message.text)
     await message.answer("Модель свича.")
     await NewSwitch.model.set()  # либо же UserState.adress.set()
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), state=NewSwitch.model)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state=NewSwitch.model)
 async def process_name(message: types.Message, state: FSMContext):
     if message.text == '5':
         await state.update_data(name=message.text)
@@ -74,7 +74,7 @@ async def process_name(message: types.Message, state: FSMContext):
         await message.answer("Ошибка! Теперь кидай фото.")
 
 
-@dp.message_handler(filters.IDFilter(user_id=USERS), state=NewSwitch.name)
+@dp.message_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), state=NewSwitch.name)
 async def process_age(message: types.Message, state: FSMContext):
     await state.update_data(age=message.text)
     await NewSwitch.fin.set()
@@ -93,7 +93,7 @@ async def process_age(message: types.Message, state: FSMContext):
     )
 
 
-@dp.callback_query_handler(filters.IDFilter(user_id=USERS), text='cancel', state=NewSwitch.fin)
+@dp.callback_query_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), text='cancel', state=NewSwitch.fin)
 async def process_callback(call: types.CallbackQuery, state: FSMContext):
     await state.finish()
     print("HERE")
@@ -106,7 +106,7 @@ async def process_callback(call: types.CallbackQuery, state: FSMContext):
     )
 
 
-@dp.callback_query_handler(filters.IDFilter(user_id=USERS), text='send_storage', state=NewSwitch.fin)
+@dp.callback_query_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), text='send_storage', state=NewSwitch.fin)
 async def process_callback(call: types.CallbackQuery, state: FSMContext):
     await call.answer()
     if call.data == "send_storage":
@@ -127,7 +127,7 @@ async def process_callback(call: types.CallbackQuery, state: FSMContext):
         )
 
 
-@dp.callback_query_handler(filters.IDFilter(user_id=USERS), cb.filter())
+@dp.callback_query_handler(filters.IDFilter(user_id=conf.tg_bot.user_ids), cb.filter())
 async def send_data(call: types.CallbackQuery, callback_data: dict):
     post = dict()
     post['action'] = callback_data.get('action')
