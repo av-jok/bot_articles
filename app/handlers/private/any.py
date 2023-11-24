@@ -1,20 +1,22 @@
-import re
+import ipaddress
 import os
+import re
 import time
 import pymysql
 import pynetbox
 import requests
-import ipaddress
-from typing import Any
 from loguru import logger
-from pprint import pprint
-from aiogram.utils.callback_data import CallbackData
-from aiogram.dispatcher import filters
-from aiogram import types
-from aiogram.types import InlineKeyboardButton
-from app.loader import dp, bot, query_insert
-from app.config import conf, nb
 from requests import request
+from pprint import pprint
+from typing import Any
+from aiogram import types
+from aiogram.dispatcher import filters
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.callback_data import CallbackData
+
+
+from app.config import conf, nb
+from app.loader import dp, bot, query_insert
 
 cb = CallbackData("post", "action", "value", "id")
 
@@ -175,10 +177,11 @@ async def scan_message(message: types.Message):
         pprint(select_all_rows)
         with db.cursor() as cursor:
             cursor.execute(select_all_rows)
-            row = cursor.fetchone()
+            row = cursor.rowcount
+            # row = cursor.fetchone()
             pprint(row)
 
-        if not row:
+        if row == 0:
             args = (asset_tag, filename, message.photo[-1].file_unique_id, message.photo[-1].file_id,
                     message.reply_to_message.from_user.first_name)
             insert_query = f"INSERT INTO `bot_photo` (`sid`, `name`, `tid`, `file_id`, `upload`) VALUES (%s, %s, %s, %s, %s);"

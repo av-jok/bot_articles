@@ -3,8 +3,8 @@ import os
 import pymysql
 from app.config import conf
 
-db = pymysql.connect(host=conf.db.host,
-                     port=conf.db.port,
+db = pymysql.connect(host='localhost',
+                     port=13306,
                      user=conf.db.user,
                      password=conf.db.password,
                      database=conf.db.database,
