@@ -107,3 +107,4 @@ env.read_env()
 conf = load_config()
 nb = pynetbox.api(url=conf.netbox.netbox_url, token=conf.netbox.netbox_api)
 nb.http_session.verify = False
+urllib3.disable_warnings()
